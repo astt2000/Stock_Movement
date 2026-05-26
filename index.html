@@ -3,108 +3,121 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Enhanced Live Stock Technical Dashboard</title>
+<title>Mobile-Optimized Multi-List Stock Dashboard</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;color:#2c2c2c;line-height:1.45}
 
 header{
-  background:#1a2a6c;color:#fff;
-  padding:10px 16px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:#1a2a6c;color:#fff;padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
 }
-header h1{font-size:13pt;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
-.hdr-left{display:flex;align-items:center;gap:20px;}
-.hdr-meta{
-  display:flex;gap:16px;flex-wrap:wrap;align-items:center;
-  font-size:8.5pt;opacity:.82;white-space:nowrap;
-}
+header h1{font-size:13pt;font-weight:700;letter-spacing:-.3px}
+.hdr-left{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.hdr-meta{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:8.5pt;opacity:.82}
 .hdr-meta span::before{content:"● ";opacity:.65}
 
-.status-badge {
-  background: rgba(255,255,255,0.15);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 8.5pt;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+/* Toggle Switch Styling */
+.toggle-container { display:flex; gap:4px; background:rgba(0,0,0,0.2); padding:4px; border-radius:6px; }
+.toggle-btn {
+  background:none; border:none; color:#fff; padding:6px 12px; font-size:8.5pt; font-weight:600;
+  cursor:pointer; border-radius:4px; transition: all 0.2s;
 }
-.status-dot { width: 7px; height: 7px; background: #2ecc71; border-radius: 50%; display: inline-block; }
+.toggle-btn.active { background:#fff; color:#1a2a6c; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
 
-.page{padding:10px 14px;max-width:1160px;margin:0 auto}
-h2{color:#1a2a6c;border-bottom:2px solid #b21f1f;padding-bottom:3px;margin:12px 0 7px;font-size:10.5pt}
+.status-badge { background:rgba(255,255,255,0.15); color:white; padding:4px 10px; border-radius:4px; font-size:8.5pt; font-weight:600; display:flex; align-items:center; gap:6px; }
+.status-dot { width:7px; height:7px; background:#2ecc71; border-radius:50%; display:inline-block; }
 
-.table-wrap{border-radius:7px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1);margin-bottom:9px}
-table{width:100%;border-collapse:collapse;background:#fff;font-size:9pt}
-th,td{border-bottom:1px solid #e4e7eb;padding:5px 8px;text-align:left;vertical-align:middle}
-th{background:#1a2a6c;color:#fff;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap;position:relative}
+.page{padding:10px 14px; max-width:1160px; margin:0 auto}
+h2{color:#1a2a6c; border-bottom:2px solid #b21f1f; padding-bottom:3px; margin:14px 0 7px; font-size:11pt}
+
+/* Mobile Friendly Horizontal Swipe Matrix Wrapper */
+.table-wrap{border-radius:7px; overflow-x:auto; box-shadow:0 1px 4px rgba(0,0,0,.1); margin-bottom:9px; background:#fff; -webkit-overflow-scrolling:touch;}
+table{width:100%; border-collapse:collapse; font-size:9pt; min-width:650px;}
+th,td{border-bottom:1px solid #e4e7eb; padding:8px 10px; text-align:left; vertical-align:middle}
+th{background:#1a2a6c; color:#fff; font-weight:600; cursor:pointer; user-select:none; white-space:nowrap; position:relative}
 th:hover{background:#243898}
 
-/* Sorting Directional Arrows CSS UI Elements */
-.si{font-size:8px;margin-left:5px;opacity:.6}
-th.sa .si::after{content:' ↑';color:#ffcc00;font-weight:bold}
-th.sd .si::after{content:' ↓';color:#ffcc00;font-weight:bold}
+/* Native CSS Structural Tooltip Logic */
+.tooltip { position:relative; border-bottom:1px dashed #ffcc00; cursor:help; }
+.tooltip .tooltiptext {
+  visibility:hidden; width:220px; background-color:#222; color:#fff; text-align:left;
+  border-radius:6px; padding:8px 10px; position:absolute; z-index:10; bottom:125%; left:50%;
+  transform:translateX(-50%); opacity:0; transition:opacity 0.2s; font-weight:400; font-size:8pt;
+  line-height:1.3; box-shadow:0 2px 8px rgba(0,0,0,0.3); white-space:normal;
+}
+.tooltip:hover .tooltiptext { visibility:visible; opacity:1; }
+
+.si{font-size:8px; margin-left:4px; opacity:.6}
+th.sa .si::after{content:' ↑'; color:#ffcc00}
+th.sd .si::after{content:' ↓'; color:#ffcc00}
 
 tr:nth-child(even) td{background:#f8fafb}
 tr:hover td{background:#edf0f8}
-.sy{font-weight:700;color:#1a2a6c;white-space:nowrap}
-.co-name{font-size:8pt;color:#666;font-weight:400;margin-left:6px;display:inline-block}
+.sy{font-weight:700; color:#1a2a6c; white-space:nowrap}
+.co-name{font-size:8pt; color:#666; font-weight:400; margin-left:6px;}
 
-.bull{color:#1d7a45;font-weight:700}.bear{color:#b21f1f;font-weight:700}.neut{color:#a06500;font-weight:700}
+.bull{color:#1d7a45; font-weight:700}.bear{color:#b21f1f; font-weight:700}.neut{color:#a06500; font-weight:700}
 
 .legend{
-  background:#fff;border-radius:6px;padding:5px 12px;
-  margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,.07);
-  font-size:8.5pt;display:flex;gap:18px;align-items:center;flex-wrap:wrap
+  background:#fff; border-radius:6px; padding:6px 12px; margin-bottom:9px;
+  box-shadow:0 1px 3px rgba(0,0,0,.07); font-size:8.5pt; display:flex; gap:14px; align-items:center; flex-wrap:wrap
 }
-.li{display:flex;align-items:center;gap:5px}
-.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.li{display:flex; align-items:center; gap:5px}
+.dot{width:8px; height:8px; border-radius:50%; flex-shrink:0}
 
-.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.dc{background:#fff;border-radius:6px;padding:8px 10px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-top:3px solid #ddd}
+/* Adaptive Responsive Layout Grid system */
+.card-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px}
+.dc{background:#fff; border-radius:6px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,.08); border-top:3px solid #ddd}
 .dc.bull{border-top-color:#1d7a45}.dc.bear{border-top-color:#b21f1f}.dc.neut{border-top-color:#a06500}
-.dch{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px}
-.dcsym{font-size:11pt;font-weight:700;color:#1a2a6c;line-height:1.1}
-.dccname{font-size:8pt;color:#555;font-weight:500;margin-top:1px}
+.dch{display:flex; justify-content:space-between; align-items:flex-start; gap:6px; margin-bottom:4px}
+.dcsym{font-size:11pt; font-weight:700; color:#1a2a6c; line-height:1.1}
+.dccname{font-size:8pt; color:#555; font-weight:500; margin-top:1px}
 
-.badge{display:inline-block;font-size:7.5pt;font-weight:700;padding:1px 7px;border-radius:8px;margin-top:4px}
-.bb{background:#d4edda;color:#155724}.br{background:#f8d7da;color:#721c24}.bn{background:#fff3cd;color:#856404}
-.chg{font-size:7.5pt;font-weight:700;display:block;margin-top:1px}
+.badge{display:inline-block; font-size:7.5pt; font-weight:700; padding:1px 7px; border-radius:8px; margin-top:4px}
+.bb{background:#d4edda; color:#155724}.br{background:#f8d7da; color:#721c24}.bn{background:#fff3cd; color:#856404}
+.chg{font-size:7.5pt; font-weight:700; display:block; margin-top:1px}
 .chg.up{color:#1d7a45}.chg.dn{color:#b21f1f}
-.dct{margin:4px 0 6px;font-size:8.5pt;color:#444;line-height:1.45}
+.dct{margin:4px 0 6px; font-size:8.5pt; color:#444; line-height:1.45}
 
-/* System Intel Framework Styling Elements */
 .decision-box {
-  background:#f4f6fa;border-radius:4px;padding:6px;margin-bottom:6px;
-  display:flex;justify-content:space-between;align-items:center;font-size:8pt;border-left:3px solid #777;
+  background:#f4f6fa; border-radius:4px; padding:6px; margin-bottom:6px;
+  display:flex; justify-content:space-between; align-items:center; font-size:8pt; border-left:3px solid #777;
 }
-.decision-box.act-buy { border-left-color: #1d7a45; background: #eafdff; }
-.decision-box.act-sell { border-left-color: #b21f1f; background: #fff2f2; }
-.decision-box.act-hold { border-left-color: #a06500; background: #fffdea; }
+.decision-box.act-buy { border-left-color:#1d7a45; background:#eafdff; }
+.decision-box.act-sell { border-left-color:#b21f1f; background:#fff2f2; }
+.decision-box.act-hold { border-left-color:#a06500; background:#fffdea; }
 
-.lvs{display:flex;gap:4px;flex-wrap:wrap}
-.lv{font-size:7.5pt;font-weight:700;padding:2px 7px;border-radius:3px}
-.ls{background:#e8f5ed;color:#1d7a45}.lr{background:#fde8e8;color:#b21f1f}.lt{background:#e8edf8;color:#1a2a6c}
+.lvs{display:flex; gap:4px; flex-wrap:wrap}
+.lv{font-size:7.5pt; font-weight:700; padding:2px 7px; border-radius:3px}
+.ls{background:#e8f5ed; color:#1d7a45}.lr{background:#fde8e8; color:#b21f1f}.lt{background:#e8edf8;color:#1a2a6c}
+
+/* Breakpoint Media Engine for Mobile Screens */
+@media (max-width:850px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width:580px) {
+  header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .card-grid { grid-template-columns: 1fr; }
+  .tooltip .tooltiptext { left: auto; right: 0; transform: none; } /* Reposition tooltips on tiny widths */
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="hdr-left">
-    <h1>Enhanced Multi-API Dynamic Dashboard</h1>
-    <div class="hdr-meta">
-      <span>Pipeline: Automated Actions Engine</span>
-      <span id="liveTimestamp">Syncing Matrix...</span>
+    <h1>Multi-API Dynamic Stock Dashboard</h1>
+    <div class="toggle-container">
+      <button id="btnList1" class="toggle-btn active" onclick="switchList(1)">Stock List 1</button>
+      <button id="btnList2" class="toggle-btn" onclick="switchList(2)">Stock List 2</button>
     </div>
   </div>
-  <div class="status-badge"><div class="status-dot"></div> Live Node Connected</div>
+  <div class="status-badge"><div class="status-dot"></div> Live Matrix Connected</div>
 </header>
 
 <div class="page">
-  <h2>Real-Time Market Tracking View <span style="font-size:7.5pt;font-weight:normal;color:#666;">(Click table headers to sort instantly)</span></h2>
+  <h2>Real-Time Market Tracking View</h2>
   <div class="table-wrap">
     <table id="stockTable">
       <thead>
@@ -112,23 +125,30 @@ tr:hover td{background:#edf0f8}
           <th onclick="sortTable(0)">Symbol / Name <span class="si"></span></th>
           <th onclick="sortTable(1)">Live Quote Price <span class="si"></span></th>
           <th onclick="sortTable(2)">Change % <span class="si"></span></th>
-          <th onclick="sortTable(3)">RSI-14 Index <span class="si"></span></th>
+          <th onclick="sortTable(3)" class="tooltip">RSI-14 Index 
+            <span class="tooltiptext">
+              <strong>Relative Strength Index Breakdown:</strong><br>
+              • <strong>&ge; 65 (Overbought):</strong> High upward momentum; potential downside correction risk.<br>
+              • <strong>&le; 35 (Oversold):</strong> Strong selling pressure; potential turnaround asset buying zone.
+            </span>
+            <span class="si"></span>
+          </th>
           <th onclick="sortTable(4)">MACD Structural Phase <span class="si"></span></th>
           <th onclick="sortTable(5)">System Action <span class="si"></span></th>
-          <th onclick="sortTable(6)">Confidence Level <span class="si"></span></th>
+          <th onclick="sortTable(6)">Confidence <span class="si"></span></th>
         </tr>
       </thead>
       <tbody id="tb">
-        <tr><td colspan="7" style="text-align:center;padding:20px;">Awaiting background file tracking signatures...</td></tr>
+        <tr><td colspan="7" style="text-align:center;padding:20px;">Synchronizing structural JSON tracking bounds...</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="legend">
     <strong>Strategic Bias Legend:</strong>
-    <div class="li"><div class="dot" style="background:#1d7a45"></div>Bullish Accumulation / BUY</div>
-    <div class="li"><div class="dot" style="background:#b21f1f"></div>Bearish Distribution / SELL</div>
-    <div class="li"><div class="dot" style="background:#a06500"></div>Consolidation Channel / HOLD</div>
+    <div class="li"><div class="dot" style="background:#1d7a45"></div>BUY</div>
+    <div class="li"><div class="dot" style="background:#b21f1f"></div>SELL</div>
+    <div class="li"><div class="dot" style="background:#a06500"></div>HOLD</div>
   </div>
 
   <h2>Detailed Performance Profiles & AI Intelligence Allocation Models</h2>
@@ -136,35 +156,23 @@ tr:hover td{background:#edf0f8}
 </div>
 
 <script>
-let activeData = [];
+let rawPayload = null;
+let currentActiveList = 1;
+let displayData = [];
 let sortDirection = 1; 
 let lastSortedCol = -1;
 
-// Global Structural Dictionary Mapping Corporate Names
 const stockNames = {
-  "ALAB": "A錯ro Labs Inc.",
-  "BBAI": "BigBear.ai Holdings Inc.",
-  "BMNR": "BioMarin Pharmaceutical",
-  "BTBT": "Bit Digital Inc.",
-  "ENVX": "Enovix Corporation",
-  "IOT": "Samsara Inc. Class A",
-  "KEEL": "Keel Asset Co.",
-  "KULR": "KULR Technology Group",
-  "LIDR": "AEye Inc.",
-  "LUCD": "Lucid Group Inc.",
-  "LUNR": "Intuitive Machines Inc.",
-  "MVST": "Microvast Holdings",
-  "OKLO": "Oklo Inc. Common Stock",
-  "QS": "QuantumScape Corporation",
-  "RKLB": "Rocket Lab USA Inc.",
-  "RUM": "Rumble Inc.",
-  "SMR": "NuScale Power Corporation",
-  "SOFI": "SoFi Technologies Inc.",
-  "SOUN": "SoundHound AI Inc."
+  "ALAB": "A錯ro Labs Inc.", "BBAI": "BigBear.ai Holdings Inc.", "BMNR": "BioMarin Pharmaceutical",
+  "BTBT": "Bit Digital Inc.", "ENVX": "Enovix Corporation", "IOT": "Samsara Inc. Class A",
+  "KEEL": "Keel Asset Co.", "KULR": "KULR Technology Group", "LIDR": "AEye Inc.",
+  "LUCD": "Lucid Group Inc.", "LUNR": "Intuitive Machines Inc.", "MVST": "Microvast Holdings",
+  "OKLO": "Oklo Inc. Common Stock", "QS": "QuantumScape Corporation", "RKLB": "Rocket Lab USA Inc.",
+  "RUM": "Rumble Inc.", "SMR": "NuScale Power Corporation", "SOFI": "SoFi Technologies Inc.", "SOUN": "SoundHound AI Inc."
 };
 
 function calculateActionMatrix(price, rsiVal, macdStr, change) {
-  let sentiment = 'neut', label = 'Neutral Framework', decision = 'HOLD', conf = '50%', styleClass = 'act-hold';
+  let sentiment = 'neut', label = 'Neutral Framework', decision = 'HOLD', conf = '60%', styleClass = 'act-hold';
   let an = 'Price channels consolidate within balanced technical fields.', out = 'Monitor structural ranges.';
   
   let structuralScore = 0;
@@ -172,8 +180,6 @@ function calculateActionMatrix(price, rsiVal, macdStr, change) {
   if (rsiVal >= 65) structuralScore -= 2;
   if (macdStr.includes('Bull')) structuralScore += 2;
   if (macdStr.includes('Bear')) structuralScore -= 2;
-  if (change > 1.0) structuralScore += 1;
-  if (change < -1.0) structuralScore -= 1;
 
   if (structuralScore >= 2) {
     sentiment = 'bull'; label = 'Bullish Accumulation'; decision = 'BUY'; styleClass = 'act-buy';
@@ -183,10 +189,7 @@ function calculateActionMatrix(price, rsiVal, macdStr, change) {
     sentiment = 'bear'; label = 'Bearish Distribution'; decision = 'SELL'; styleClass = 'act-sell';
     conf = structuralScore <= -4 ? '95%' : '78%';
     an = 'Distribution blocks sizing up technical downside pressure.'; out = 'Risk mitigation suggested.';
-  } else {
-    conf = Math.abs(change) < 0.2 ? '85%' : '60%';
   }
-
   return { s: sentiment, sl: label, decision, confidence: conf, styleClass, an, out, sup: (price * 0.95).toFixed(2), res: (price * 1.04).toFixed(2), tgt: (price * 1.10).toFixed(2) };
 }
 
@@ -200,14 +203,13 @@ function spark(prices,s){
     const y=H-3-((p-mn)/rng)*(H-6);
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   });
-  const[lx,ly]=pts[pts.length-1].split(',');
-  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible"><polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${lx}" cy="${ly}" r="2.5" fill="${col}"/></svg>`;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible"><polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${pts[pts.length-1].split(',')[0]}" cy="${pts[pts.length-1].split(',')[1]}" r="2.5" fill="${col}"/></svg>`;
 }
 
-function renderUI(data) {
+function renderUI() {
   const BC={bull:'bb',bear:'br',neut:'bn'};
   
-  document.getElementById('tb').innerHTML = data.map(r=>`
+  document.getElementById('tb').innerHTML = displayData.map(r=>`
     <tr>
       <td class="sy">${r.sym}<span class="co-name">${r.fullName}</span></td>
       <td><strong>$${r.price.toFixed(2)}</strong></td>
@@ -218,7 +220,7 @@ function renderUI(data) {
       <td><strong>${r.confidence}</strong></td>
     </tr>`).join('');
 
-  document.getElementById('cg').innerHTML = data.map(r=>`
+  document.getElementById('cg').innerHTML = displayData.map(r=>`
     <div class="dc ${r.s}">
       <div class="dch">
         <div>
@@ -233,42 +235,50 @@ function renderUI(data) {
       </div>
       
       <div class="decision-box ${r.styleClass}">
-        <span>SUGGESTED SIGNAL: <strong>${r.decision}</strong></span>
+        <span>SIGNAL: <strong>${r.decision}</strong></span>
         <span>CONFIDENCE: <strong>${r.confidence}</strong></span>
       </div>
-
-      <p class="dct"><strong>Analysis:</strong> ${r.an}<br><strong>Outlook:</strong> ${r.out}</p>
+      <p class="dct"><strong>Analysis:</strong> ${r.an}</p>
       <div class="lvs">
-        <span class="lv ls">EST SUP $${r.sup}</span>
-        <span class="lv lr">EST RES $${r.res}</span>
+        <span class="lv ls">SUP $${r.sup}</span>
+        <span class="lv lr">RES $${r.res}</span>
         <span class="lv lt">TGT $${r.tgt}</span>
       </div>
     </div>`).join('');
 }
 
-// Interactive Multi-Column Sorting Logic
-function sortTable(columnIndex) {
-  if (activeData.length === 0) return;
+function switchList(listNumber) {
+  currentActiveList = listNumber;
+  document.getElementById('btnList1').classList.toggle('active', listNumber === 1);
+  document.getElementById('btnList2').classList.toggle('active', listNumber === 2);
   
-  if (lastSortedCol === columnIndex) {
-    sortDirection = -sortDirection;
-  } else {
-    sortDirection = 1;
-    lastSortedCol = columnIndex;
-  }
-
-  // Visual feedback update for sorting direction arrows
-  const headers = document.querySelectorAll("#stockTable th");
-  headers.forEach((h, idx) => {
-    h.classList.remove("sa", "sd");
-    if (idx === columnIndex) {
-      h.classList.add(sortDirection === 1 ? "sa" : "sd");
-    }
-  });
-
-  activeData.sort((a, b) => {
-    let valA, valB;
+  if (!rawPayload) return;
+  
+  const activeSymbols = listNumber === 1 ? rawPayload.list1_symbols : rawPayload.list2_symbols;
+  
+  displayData = activeSymbols
+    .filter(sym => rawPayload.registry[sym])
+    .map(sym => {
+      const r = rawPayload.registry[sym];
+      const fullName = stockNames[sym] || "Global Equity Asset";
+      const logic = calculateActionMatrix(r.price, r.rsi, r.macdStr, r.change);
+      return { ...r, ...logic, fullName };
+    });
     
+  lastSortedCol = -1; 
+  renderUI();
+}
+
+function sortTable(columnIndex) {
+  if (displayData.length === 0) return;
+  sortDirection = (lastSortedCol === columnIndex) ? -sortDirection : 1;
+  lastSortedCol = columnIndex;
+
+  const headers = document.querySelectorAll("#stockTable th");
+  headers.forEach((h, idx) => { h.classList.remove("sa", "sd"); if (idx === columnIndex) h.classList.add(sortDirection === 1 ? "sa" : "sd"); });
+
+  displayData.sort((a, b) => {
+    let valA, valB;
     switch(columnIndex) {
       case 0: valA = a.sym; valB = b.sym; break;
       case 1: valA = a.price; valB = b.price; break;
@@ -279,32 +289,18 @@ function sortTable(columnIndex) {
       case 6: valA = parseFloat(a.confidence); valB = parseFloat(b.confidence); break;
       default: return 0;
     }
-
-    if (typeof valA === 'string') {
-      return sortDirection * valA.localeCompare(valB);
-    } else {
-      return sortDirection * (valA - valB);
-    }
+    return typeof valA === 'string' ? sortDirection * valA.localeCompare(valB) : sortDirection * (valA - valB);
   });
-
-  renderUI(activeData);
+  renderUI();
 }
 
 async function loadLocalJson() {
   try {
     const res = await fetch('./live_market.json', { cache: "no-store" });
-    const data = await res.json();
-    document.getElementById('liveTimestamp').innerText = `Last Matrix Sync: ${new Date().toLocaleTimeString()}`;
-    
-    activeData = data.map(r => {
-      const fullName = stockNames[r.sym] || "Global Equity Asset";
-      const logic = calculateActionMatrix(r.price, r.rsi, r.macdStr, r.change);
-      return { ...r, ...logic, fullName };
-    });
-    
-    renderUI(activeData);
+    rawPayload = await res.json();
+    switchList(currentActiveList);
   } catch (err) {
-    console.log("Awaiting core background generation pipeline arrays...");
+    console.log("Awaiting automation runtime arrays output synchronization...");
   }
 }
 
