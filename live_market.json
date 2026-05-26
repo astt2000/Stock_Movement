@@ -26,254 +26,38 @@
     "TMC"
   ],
   "list2_symbols": [
-    "LUCD",
-    "LUNR",
-    "MVST",
-    "OKLO",
-    "QS",
-    "RKLB",
-    "RUM",
-    "SMR",
-    "SOFI",
-    "SOUN"
+    "APPL",
+    "NOK",
+    "INTL",
+    "NVDA"
   ],
   "registry": {
-    "MVST": {
-      "sym": "MVST",
-      "price": 1.46,
-      "change": 5.7971,
-      "rsi": 64.49275,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        1.38,
-        1.37,
-        1.4454,
-        1.4746,
-        1.46
-      ]
-    },
-    "IOT": {
-      "sym": "IOT",
-      "price": 31.15,
-      "change": 3.3167,
-      "rsi": 58.29175,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        30.15,
-        30.45,
-        30.8385,
-        31.461499999999997,
-        31.15
-      ]
-    },
-    "NOK": {
-      "sym": "NOK",
-      "price": 15.47,
-      "change": 9.0973,
-      "rsi": 72.74325,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        14.18,
-        14.7,
-        15.3153,
-        15.6247,
-        15.47
-      ]
-    },
-    "OKLO": {
-      "sym": "OKLO",
-      "price": 65.88,
-      "change": 1.2137,
-      "rsi": 53.03425,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        65.09,
-        66.82,
-        65.2212,
-        66.5388,
-        65.88
-      ]
-    },
-    "SMR": {
-      "sym": "SMR",
-      "price": 11.4,
-      "change": 0.6178,
-      "rsi": 51.5445,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        11.33,
-        11.14,
-        11.286,
-        11.514000000000001,
-        11.4
-      ]
-    },
-    "SOUN": {
-      "sym": "SOUN",
-      "price": 8.17,
-      "change": -1.8029,
-      "rsi": 45.49275,
-      "macdStr": "Bearish Realignment",
-      "history": [
-        8.32,
-        8.32,
-        8.0883,
-        8.2517,
-        8.17
-      ]
-    },
-    "BMNR": {
-      "sym": "BMNR",
-      "price": 18.88,
-      "change": -3.7226,
-      "rsi": 40.6935,
-      "macdStr": "Bearish Realignment",
-      "history": [
-        19.61,
-        19.435,
-        18.6912,
-        19.0688,
-        18.88
-      ]
-    },
-    "LAES": {
-      "sym": "LAES",
-      "price": 3.38,
-      "change": 3.3639,
-      "rsi": 58.40975,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        3.27,
-        3.26,
-        3.3462,
-        3.4137999999999997,
-        3.38
-      ]
-    },
-    "KULR": {
-      "sym": "KULR",
-      "price": 4.61,
-      "change": 19.1214,
-      "rsi": 85,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        3.87,
-        3.78,
-        4.5639,
-        4.6561,
-        4.61
-      ]
-    },
-    "BTBT": {
-      "sym": "BTBT",
-      "price": 1.99,
-      "change": 2.5773,
-      "rsi": 56.44325,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        1.94,
-        1.97,
-        1.9701,
-        2.0099,
-        1.99
-      ]
-    },
-    "KEEL": {
-      "sym": "KEEL",
-      "price": 4.81,
-      "change": 3.6638,
-      "rsi": 59.1595,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        4.64,
-        4.655,
-        4.7619,
-        4.858099999999999,
-        4.81
-      ]
-    },
-    "RR": {
-      "sym": "RR",
-      "price": 2.68,
-      "change": 0.0,
-      "rsi": 50.0,
+    "INTL": {
+      "sym": "INTL",
+      "price": 30.67,
+      "change": -0.1628,
+      "rsi": 49.593,
       "macdStr": "Neutral Phase",
       "history": [
-        2.68,
-        2.66,
-        2.6532,
-        2.7068000000000003,
-        2.68
+        30.72,
+        30.71,
+        30.363300000000002,
+        30.9767,
+        30.67
       ]
     },
-    "LIDR": {
-      "sym": "LIDR",
-      "price": 1.89,
-      "change": -1.0471,
-      "rsi": 47.38225,
+    "NVDA": {
+      "sym": "NVDA",
+      "price": 215.33,
+      "change": -1.9042,
+      "rsi": 45.2395,
       "macdStr": "Bearish Realignment",
       "history": [
-        1.91,
-        1.9,
-        1.8711,
-        1.9088999999999998,
-        1.89
-      ]
-    },
-    "LUNR": {
-      "sym": "LUNR",
-      "price": 38.26,
-      "change": 11.7407,
-      "rsi": 79.35175000000001,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        34.24,
-        35.4,
-        37.877399999999994,
-        38.6426,
-        38.26
-      ]
-    },
-    "RKLB": {
-      "sym": "RKLB",
-      "price": 135.76,
-      "change": 8.2184,
-      "rsi": 70.546,
-      "macdStr": "Bullish Crossover",
-      "history": [
-        125.45,
-        131.41,
-        134.4024,
-        137.11759999999998,
-        135.76
-      ]
-    },
-    "BBAI": {
-      "sym": "BBAI",
-      "price": 4.18,
-      "change": -0.4762,
-      "rsi": 48.8095,
-      "macdStr": "Neutral Phase",
-      "history": [
-        4.2,
-        4.22,
-        4.138199999999999,
-        4.2218,
-        4.18
-      ]
-    },
-    "SOFI": {
-      "sym": "SOFI",
-      "price": 15.62,
-      "change": -0.1917,
-      "rsi": 49.52075,
-      "macdStr": "Neutral Phase",
-      "history": [
-        15.65,
-        15.7,
-        15.463799999999999,
-        15.7762,
-        15.62
+        219.51,
+        220.904,
+        213.1767,
+        217.4833,
+        215.33
       ]
     },
     "ABAT": {
@@ -290,18 +74,18 @@
         3.23
       ]
     },
-    "QS": {
-      "sym": "QS",
-      "price": 8.2,
-      "change": -2.148,
-      "rsi": 44.63,
-      "macdStr": "Bearish Realignment",
+    "SMR": {
+      "sym": "SMR",
+      "price": 11.4,
+      "change": 0.6178,
+      "rsi": 51.5445,
+      "macdStr": "Bullish Crossover",
       "history": [
-        8.38,
-        8.3,
-        8.117999999999999,
-        8.282,
-        8.2
+        11.33,
+        11.14,
+        11.286,
+        11.514000000000001,
+        11.4
       ]
     },
     "ENVX": {
@@ -318,18 +102,18 @@
         6.68
       ]
     },
-    "AUR": {
-      "sym": "AUR",
-      "price": 7.07,
-      "change": -1.3947,
-      "rsi": 46.51325,
-      "macdStr": "Bearish Realignment",
+    "RKLB": {
+      "sym": "RKLB",
+      "price": 135.76,
+      "change": 8.2184,
+      "rsi": 70.546,
+      "macdStr": "Bullish Crossover",
       "history": [
-        7.17,
-        7.26,
-        6.9993,
-        7.140700000000001,
-        7.07
+        125.45,
+        131.41,
+        134.4024,
+        137.11759999999998,
+        135.76
       ]
     },
     "LUCD": {
@@ -346,18 +130,102 @@
         1.07
       ]
     },
-    "RUM": {
-      "sym": "RUM",
-      "price": 8.2,
-      "change": 1.737,
-      "rsi": 54.3425,
+    "RR": {
+      "sym": "RR",
+      "price": 2.68,
+      "change": 0.0,
+      "rsi": 50.0,
+      "macdStr": "Neutral Phase",
+      "history": [
+        2.68,
+        2.66,
+        2.6532,
+        2.7068000000000003,
+        2.68
+      ]
+    },
+    "BMNR": {
+      "sym": "BMNR",
+      "price": 18.88,
+      "change": -3.7226,
+      "rsi": 40.6935,
+      "macdStr": "Bearish Realignment",
+      "history": [
+        19.61,
+        19.435,
+        18.6912,
+        19.0688,
+        18.88
+      ]
+    },
+    "SOFI": {
+      "sym": "SOFI",
+      "price": 15.62,
+      "change": -0.1917,
+      "rsi": 49.52075,
+      "macdStr": "Neutral Phase",
+      "history": [
+        15.65,
+        15.7,
+        15.463799999999999,
+        15.7762,
+        15.62
+      ]
+    },
+    "OKLO": {
+      "sym": "OKLO",
+      "price": 65.88,
+      "change": 1.2137,
+      "rsi": 53.03425,
       "macdStr": "Bullish Crossover",
       "history": [
-        8.06,
-        8.02,
-        8.117999999999999,
-        8.282,
-        8.2
+        65.09,
+        66.82,
+        65.2212,
+        66.5388,
+        65.88
+      ]
+    },
+    "KEEL": {
+      "sym": "KEEL",
+      "price": 4.81,
+      "change": 3.6638,
+      "rsi": 59.1595,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        4.64,
+        4.655,
+        4.7619,
+        4.858099999999999,
+        4.81
+      ]
+    },
+    "SOUN": {
+      "sym": "SOUN",
+      "price": 8.17,
+      "change": -1.8029,
+      "rsi": 45.49275,
+      "macdStr": "Bearish Realignment",
+      "history": [
+        8.32,
+        8.32,
+        8.0883,
+        8.2517,
+        8.17
+      ]
+    },
+    "LUNR": {
+      "sym": "LUNR",
+      "price": 38.26,
+      "change": 11.7407,
+      "rsi": 79.35175000000001,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        34.24,
+        35.4,
+        37.877399999999994,
+        38.6426,
+        38.26
       ]
     },
     "TMC": {
@@ -372,6 +240,160 @@
         5.346,
         5.454000000000001,
         5.4
+      ]
+    },
+    "MVST": {
+      "sym": "MVST",
+      "price": 1.46,
+      "change": 5.7971,
+      "rsi": 64.49275,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        1.38,
+        1.37,
+        1.4454,
+        1.4746,
+        1.46
+      ]
+    },
+    "BTBT": {
+      "sym": "BTBT",
+      "price": 1.99,
+      "change": 2.5773,
+      "rsi": 56.44325,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        1.94,
+        1.97,
+        1.9701,
+        2.0099,
+        1.99
+      ]
+    },
+    "AUR": {
+      "sym": "AUR",
+      "price": 7.07,
+      "change": -1.3947,
+      "rsi": 46.51325,
+      "macdStr": "Bearish Realignment",
+      "history": [
+        7.17,
+        7.26,
+        6.9993,
+        7.140700000000001,
+        7.07
+      ]
+    },
+    "QS": {
+      "sym": "QS",
+      "price": 8.2,
+      "change": -2.148,
+      "rsi": 44.63,
+      "macdStr": "Bearish Realignment",
+      "history": [
+        8.38,
+        8.3,
+        8.117999999999999,
+        8.282,
+        8.2
+      ]
+    },
+    "RUM": {
+      "sym": "RUM",
+      "price": 8.2,
+      "change": 1.737,
+      "rsi": 54.3425,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        8.06,
+        8.02,
+        8.117999999999999,
+        8.282,
+        8.2
+      ]
+    },
+    "LAES": {
+      "sym": "LAES",
+      "price": 3.38,
+      "change": 3.3639,
+      "rsi": 58.40975,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        3.27,
+        3.26,
+        3.3462,
+        3.4137999999999997,
+        3.38
+      ]
+    },
+    "NOK": {
+      "sym": "NOK",
+      "price": 15.47,
+      "change": 9.0973,
+      "rsi": 72.74325,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        14.18,
+        14.7,
+        15.3153,
+        15.6247,
+        15.47
+      ]
+    },
+    "BBAI": {
+      "sym": "BBAI",
+      "price": 4.18,
+      "change": -0.4762,
+      "rsi": 48.8095,
+      "macdStr": "Neutral Phase",
+      "history": [
+        4.2,
+        4.22,
+        4.138199999999999,
+        4.2218,
+        4.18
+      ]
+    },
+    "LIDR": {
+      "sym": "LIDR",
+      "price": 1.89,
+      "change": -1.0471,
+      "rsi": 47.38225,
+      "macdStr": "Bearish Realignment",
+      "history": [
+        1.91,
+        1.9,
+        1.8711,
+        1.9088999999999998,
+        1.89
+      ]
+    },
+    "IOT": {
+      "sym": "IOT",
+      "price": 31.15,
+      "change": 3.3167,
+      "rsi": 58.29175,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        30.15,
+        30.45,
+        30.8385,
+        31.461499999999997,
+        31.15
+      ]
+    },
+    "KULR": {
+      "sym": "KULR",
+      "price": 4.61,
+      "change": 19.1214,
+      "rsi": 85,
+      "macdStr": "Bullish Crossover",
+      "history": [
+        3.87,
+        3.78,
+        4.5639,
+        4.6561,
+        4.61
       ]
     }
   }
