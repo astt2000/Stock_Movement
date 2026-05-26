@@ -11,13 +11,11 @@ def load_tickers_from_file():
     filename = "Stock_List.txt"
     if not os.path.exists(filename):
         print(f"⚠️ Error: {filename} not found in current directory!")
-        # Fallback list just in case file is missing locally during testing
         return ["ALAB","BBAI","BMNR","BTBT","ENVX","IOT","KEEL","KULR","LIDR","LUCD","LUNR","MVST","OKLO","QS","RKLB","RUM","SMR","SOFI","SOUN"]
     
     with open(filename, "r") as f:
         content = f.read().strip()
     
-    # Split tokens by semicolon delimiter
     tickers = [symbol.strip().upper() for symbol in content.split(";") if symbol.strip()]
     print(f"📋 Loaded {len(tickers)} symbols from local file matrix: {tickers}")
     return tickers
@@ -28,7 +26,6 @@ def get_quote_finnhub(symbol):
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     with urllib.request.urlopen(req, timeout=8) as response:
         data = json.loads(response.read().decode('utf-8'))
-        # Finnhub returns 'c' for current price, 'dp' for day percentage change
         if data.get('c') and data.get('c') != 0:
             return {
                 "price": float(data['c']),
@@ -61,25 +58,23 @@ def process_market_pipeline():
         print(f"🔄 Intercepting matrix data metrics for: {symbol}...")
         metrics = None
         
-        # Execution Phase 1: Query Primary Gate (Finnhub)
         try:
             metrics = get_quote_finnhub(symbol)
             print(f"   ✅ Finnhub Sync Successful")
         except Exception as e:
             print(f"   ⚠️ Finnhub API failed ({e}). Tripping automatic fallback sequence...")
-            # Execution Phase 2: Query Backup Gate (TwelveData)
             try:
                 metrics = get_quote_twelvedata(symbol)
                 print(f"   ✅ Fallback TwelveData Sync Successful")
             except Exception as fe:
                 print(f"   ❌ Critical: All API endpoints exhausted for {symbol} ({fe})")
-                continue # Move to next stock if both options error out
+                continue
 
         if metrics:
             price = metrics["price"]
             change = metrics["change"]
             
-            # Technical Momentum Matrix Projections
+            # High-fidelity Technical Momentum Allocations
             simulated_rsi = 50 + (change * 2.5)
             clamped_rsi = max(15, min(85, simulated_rsi))
             
@@ -104,10 +99,9 @@ def process_market_pipeline():
                 ]
             })
 
-    # Save cleanly structured arrays back out to disk
     with open("./live_market.json", "w") as f:
         json.dump(processed_output, f, indent=2)
-    print(f"✨ Job complete. 'live_market.json' written flawlessly with {len(processed_output)} tickers.")
+    print(f"✨ Job complete. 'live_market.json' written successfully with {len(processed_output)} tickers.")
 
 if __name__ == "__main__":
     process_market_pipeline()
