@@ -1,0 +1,30 @@
+name: Market Data Stream Refresh
+
+on:
+  schedule:
+    # This configuration runs the automation loop automatically every hour
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allows you to trigger the data update manually
+
+jobs:
+  refresh-data:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repo source
+      uses: actions/checkout@v4
+
+    - name: Set up Python Environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Run Core Data Intercept Engine
+      run: python update_stocks.py
+
+    - name: Commit and Push Updated Market Arrays
+      run: |
+        git config --global user.name 'GitHub Market Bot'
+        git config --global user.email 'bot@github.com'
+        git add live_market.json
+        git commit -m "Automated System Update: Live Market JSON ticks updated" || exit 0
+        git push
