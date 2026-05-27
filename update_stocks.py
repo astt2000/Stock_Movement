@@ -1,6 +1,7 @@
 import json
 import urllib.request
 import os
+from datetime import datetime
 
 # API Configurations provided by user
 FINNHUB_KEY = "d2530epr01qns40ctr90d2530epr01qns40ctr9g"
@@ -90,8 +91,12 @@ def process_market_pipeline():
                 "history": [metrics["prev_close"], metrics["open"], price * 0.99, price * 1.01, price]
             }
 
+    # Generate central precise timestamp
+    sync_time = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
+
     # Package the payload cleanly split by lists
     output_data = {
+        "sync_timestamp": sync_time,
         "list1_symbols": list1_tickers,
         "list2_symbols": list2_tickers,
         "registry": global_registry
@@ -99,7 +104,7 @@ def process_market_pipeline():
 
     with open("./live_market.json", "w") as f:
         json.dump(output_data, f, indent=2)
-    print("✨ Job complete. 'live_market.json' updated with list toggles.")
+    print(f"✨ Job complete. 'live_market.json' updated natively at {sync_time}.")
 
 if __name__ == "__main__":
     process_market_pipeline()
