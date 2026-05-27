@@ -1,110 +1,117 @@
 import json
-import urllib.request
 import os
+import sys
 from datetime import datetime
 
-# API Configurations provided by user
-FINNHUB_KEY = "d2530epr01qns40ctr90d2530epr01qns40ctr9g"
-TWELVEDATA_KEY = "ac51c8bd269246109f27d4dec51bcc28"
+# Automated dependency injection wrapper for GitHub Actions environment
+try:
+    import yfinance as yf
+    import pandas as pd
+except ImportError:
+    import subprocess
+    print("📦 Installing required scientific data tracking extensions (yfinance, pandas)...")
+    subprocess.check_call([sys.executable, "-m", pip, "install", "yfinance", "pandas"])
+    import yfinance as yf
+    import pandas as pd
 
 def load_tickers_from_file(filename, default_list):
-    """Reads stock symbols dynamically from a specified file path"""
     if not os.path.exists(filename):
-        print(f"⚠️ Warning: {filename} not found. Creating a default file asset.")
         with open(filename, "w") as f:
             f.write(";".join(default_list))
         return default_list
-    
     with open(filename, "r") as f:
         content = f.read().strip()
-    
-    tickers = [symbol.strip().upper() for symbol in content.split(";") if symbol.strip()]
-    print(f"📋 Loaded {len(tickers)} symbols from {filename}: {tickers}")
-    return tickers
+    return [symbol.strip().upper() for symbol in content.split(";") if symbol.strip()]
 
-def fetch_ticker_data(symbol):
-    """Queries Finnhub with an automatic fallback mechanism to TwelveData"""
-    # Try Finnhub (Primary)
-    try:
-        url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_KEY}"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=8) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            if data.get('c') and data.get('c') != 0:
-                return {
-                    "price": float(data['c']),
-                    "change": float(data.get('dp', 0)),
-                    "prev_close": float(data.get('pc', data['c'])),
-                    "open": float(data.get('o', data['c']))
-                }
-    except Exception as e:
-        print(f"   ⚠️ Finnhub failed for {symbol}: {e}. Trying TwelveData fallback...")
+def calculate_technical_indicators(df):
+    """Calculates professional-grade mathematical RSI-14 and MACD parameters"""
+    if len(df) < 30:
+        return 50.0, "Neutral Phase", 0.0
     
-    # Try TwelveData (Fallback)
-    try:
-        url = f"https://api.twelvedata.com/quote?symbol={symbol}&apikey={TWELVEDATA_KEY}"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=8) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            if "price" in data:
-                return {
-                    "price": float(data['price']),
-                    "change": float(data.get('percent_change', 0)),
-                    "prev_close": float(data.get('previous_close', data['price'])),
-                    "open": float(data.get('open', data['price']))
-                }
-    except Exception as fe:
-        print(f"   ❌ Critical: Fallback failed for {symbol}: {fe}")
+    # 1. True RSI-14 Calculation
+    delta = df['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+    loss = (-delta.where(delta < -0, 0)).rolling(window=14).mean()
+    rs = gain / (loss + 1e-9)
+    rsi = 100 - (100 / (1 + rs))
+    current_rsi = float(rsi.iloc[-1])
     
-    return None
+    # 2. True MACD Calculation (12, 26, 9 parameter standard)
+    ema12 = df['Close'].ewm(span=12, adjust=False).mean()
+    ema26 = df['Close'].ewm(span=26, adjust=False).mean()
+    macd_line = ema12 - ema26
+    signal_line = macd_line.ewm(span=9, adjust=False).mean()
+    macd_histogram = macd_line - signal_line
+    
+    current_hist = macd_histogram.iloc[-1]
+    prev_hist = macd_histogram.iloc[-2]
+    
+    # Dynamic Phase Realignment Logic
+    if current_hist > 0 and prev_hist <= 0:
+        macd_str = "Bullish Crossover"
+    elif current_hist < 0 and prev_hist >= 0:
+        macd_str = "Bearish Realignment"
+    elif current_hist > 0:
+        macd_str = "Bullish Momentum"
+    else:
+        macd_str = "Bearish Momentum"
+        
+    return current_rsi, macd_str, float(df['Close'].iloc[-1])
 
 def process_market_pipeline():
-    # Load separate portfolios 
     list1_tickers = load_tickers_from_file("Stock_List.txt", ["ALAB","BBAI","BMNR","BTBT","ENVX","IOT","KEEL","KULR","LIDR"])
-    list2_tickers = load_tickers_from_file("Stock_List2.txt", ["LUCD","LUNR","MVST","OKLO","QS","RKLB","RUM","SMR","SOFI","SOUN"])
+    list2_tickers = load_tickers_from_file("Stock_List2.txt", ["LUCD","LUNR","MVST","OKLO","QS","RKLB","RUM","SMR","SOFI","SOUN","NVDA","AAPL"])
     
-    # Combine lists uniquely to save API calls
     all_unique_tickers = list(set(list1_tickers + list2_tickers))
     global_registry = {}
-
+    
+    # Download 60 days of historical data via batch to bypass API rate caps
+    print(f"📡 Downloading institutional candle charts for {len(all_unique_tickers)} assets...")
+    tickers_string = " ".join(all_unique_tickers)
+    data = yf.download(tickers_string, period="60d", interval="1d", group_by='ticker', progress=False)
+    
     for symbol in all_unique_tickers:
-        print(f"🔄 Intercepting matrix data metrics for: {symbol}...")
-        metrics = fetch_ticker_data(symbol)
-        
-        if metrics:
-            price = metrics["price"]
-            change = metrics["change"]
-            simulated_rsi = max(15, min(85, 50 + (change * 2.5)))
+        try:
+            # Handle both single-ticker and multi-ticker DataFrame shapes safely
+            df = data[symbol] if len(all_unique_tickers) > 1 else data
+            df = df.dropna(subset=['Close'])
             
-            macd_str = "Neutral Phase"
-            if change > 0.5:
-                macd_str = "Bullish Crossover"
-            elif change < -0.5:
-                macd_str = "Bearish Realignment"
-
+            if df.empty or len(df) < 5:
+                continue
+                
+            current_price = float(df['Close'].iloc[-1])
+            prev_close = float(df['Close'].iloc[-2])
+            pct_change = ((current_price - prev_close) / prev_close) * 100
+            
+            # Extract true mathematical signal properties
+            true_rsi, true_macd_str, _ = calculate_technical_indicators(df)
+            
+            # Extract trailing historical close points for the sparkline chart array
+            trailing_history = df['Close'].tail(5).tolist()
+            
             global_registry[symbol] = {
                 "sym": symbol,
-                "price": price,
-                "change": change,
-                "rsi": simulated_rsi,
-                "macdStr": macd_str,
-                "history": [metrics["prev_close"], metrics["open"], price * 0.99, price * 1.01, price]
+                "price": current_price,
+                "change": pct_change,
+                "rsi": true_rsi,
+                "macdStr": true_macd_str,
+                "history": trailing_history
             }
+            print(f"   ✅ Processed metrics for: {symbol} | RSI: {true_rsi:.1f} | {true_macd_str}")
+        except Exception as e:
+            print(f"   ⚠️ Skipping {symbol}: Technical computation boundary error ({e})")
 
-    # Generate central precise timestamp
     sync_time = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
-
-    # Package the payload cleanly split by lists
     output_data = {
         "sync_timestamp": sync_time,
         "list1_symbols": list1_tickers,
         "list2_symbols": list2_tickers,
         "registry": global_registry
     }
-
+    
     with open("./live_market.json", "w") as f:
         json.dump(output_data, f, indent=2)
-    print(f"✨ Job complete. 'live_market.json' updated natively at {sync_time}.")
+    print(f"✨ Job complete. 'live_market.json' database updated with true calculations at {sync_time}.")
 
 if __name__ == "__main__":
     process_market_pipeline()
