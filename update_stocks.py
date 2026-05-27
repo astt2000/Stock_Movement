@@ -1,18 +1,8 @@
 import json
 import os
-import sys
 from datetime import datetime
-
-# Automated dependency injection wrapper for GitHub Actions environment
-try:
-    import yfinance as yf
-    import pandas as pd
-except ImportError:
-    import subprocess
-    print("📦 Installing required scientific data tracking extensions (yfinance, pandas)...")
-    subprocess.check_call([sys.executable, "-m", pip, "install", "yfinance", "pandas"])
-    import yfinance as yf
-    import pandas as pd
+import yfinance as yf
+import pandas as pd
 
 def load_tickers_from_file(filename, default_list):
     if not os.path.exists(filename):
@@ -31,7 +21,7 @@ def calculate_technical_indicators(df):
     # 1. True RSI-14 Calculation
     delta = df['Close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < -0, 0)).rolling(window=14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / (loss + 1e-9)
     rsi = 100 - (100 / (1 + rs))
     current_rsi = float(rsi.iloc[-1])
