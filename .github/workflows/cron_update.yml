@@ -2,29 +2,44 @@ name: Market Data Stream Refresh
 
 on:
   schedule:
-    # This configuration runs the automation loop automatically every hour
-    - cron: '0 * * * *'
-  workflow_dispatch: # Allows you to trigger the data update manually
+    - cron: '0 * * * *' # Triggers automatically every hour
+  workflow_dispatch: # Allows you to manually click "Run workflow"
+
+# Bypasses the Node.js deprecation warnings by forcing Node 24 structures
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   refresh-data:
     runs-on: ubuntu-latest
+    
+    # CRITICAL: Gives the automation bot explicit permissions to save the json file
+    permissions:
+      contents: write
+
     steps:
-    - name: Check out repo source
+    - name: Checkout Repository Core
       uses: actions/checkout@v4
 
-    - name: Set up Python Environment
+    - name: Initialize Enterprise Python Engine
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
+        cache: 'pip' # Speeds up subsequent workflow execution runs
 
-    - name: Run Core Data Intercept Engine
+    - name: Install Scientific Analytics Dependencies
+      run: |
+        python -bin/pip install --upgrade pip
+        pip install yfinance pandas
+
+    - name: Execute Live Technical Calculations
       run: python update_stocks.py
 
-    - name: Commit and Push Updated Market Arrays
+    - name: Commit and Push Synchronized Data Packet
       run: |
-        git config --global user.name 'GitHub Market Bot'
-        git config --global user.email 'bot@github.com'
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add live_market.json
-        git commit -m "Automated System Update: Live Market JSON ticks updated" || exit 0
-        git push
+        
+        # Only commit if the file actually changed to avoid unnecessary actions loops
+        git diff-index --quiet HEAD || (git commit -m "🔄 Core Technical Indicators Database Automated Refresh" && git push)
