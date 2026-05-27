@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>QST Institutional Pro v12 | GitHub Serverless</title>
+<title>QST Institutional | GitHub Serverless</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
 <style>
   :root {
@@ -28,7 +28,10 @@
   }
   .brand { font-size: 15px; font-weight: 700; color: var(--blu); letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .badge { background: #1e293b; padding: 2px 8px; border-radius: 30px; font-size: 9px; color: var(--blu); font-weight: normal; }
-  .last-refresh { font-size: 10px; background: #0f131a; padding: 2px 8px; border-radius: 16px; font-family: monospace; color: var(--txt2); }
+  
+  /* Enlarged Last Update */
+  .last-refresh { font-size: 13px; font-weight: bold; background: #0f131a; padding: 4px 10px; border-radius: 16px; font-family: monospace; color: var(--txt); }
+  
   .meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .dot { width: 8px; height: 8px; border-radius: 50%; }
   .open { background: var(--grn); box-shadow: 0 0 5px var(--grn); }
@@ -47,7 +50,10 @@
   @media (max-width: 950px) { .col-monitor, .col-chart { flex: 0 0 100%; } }
 
   .sec { background: var(--card); border: 1px solid var(--brd); border-radius: var(--rad); padding: 10px 12px; margin-bottom: 10px; }
-  .sec-title { font-size: 11px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--txt2); }
+  .sec-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; text-transform: uppercase; letter-spacing: 0.5px; color: var(--txt2); }
+  
+  /* Sorting Dropdowns */
+  .sort-ctrl { background: #1e293b; color: var(--txt); border: 1px solid var(--brd); border-radius: 4px; padding: 3px 6px; font-size: 10px; outline: none; cursor: pointer; text-transform: none; letter-spacing: 0; }
   
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; max-height: 340px; overflow-y: auto; overflow-x: hidden; padding-right: 4px; }
   .card { background: var(--bg); border: 1px solid var(--brd); border-radius: 5px; padding: 6px 8px; cursor: pointer; transition: 0.1s; }
@@ -57,8 +63,8 @@
   .b { background: rgba(34,197,94,0.15); color: var(--grn); border: 1px solid var(--grn); }
   .s { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid var(--red); }
   .h { background: rgba(234,179,8,0.15); color: var(--yel); border: 1px solid var(--yel); }
-  .pr { font-size: 14px; font-weight: 500; margin: 2px 0 1px; }
-  .chg { font-size: 10px; }
+  .pr { font-size: 15px; font-weight: 500; }
+  .chg { font-size: 11px; font-weight: bold; }
   .p { color: var(--grn); } .n { color: var(--red); }
 
   #chartBox { height: 280px; width: 100%; border-radius: 5px; overflow: hidden; position: relative; background: #0f131a; }
@@ -83,8 +89,11 @@
   .ov.act { opacity: 1; pointer-events: all; }
   .mod { background: var(--card); border: 1px solid var(--brd); border-radius: var(--rad); width: 90%; max-width: 450px; padding: 18px; }
   .close { background: none; border: none; color: var(--txt2); font-size: 20px; cursor: pointer; }
-  .chart-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; gap: 6px; }
-  .stock-name-title { font-size: 10px; color: var(--txt2); font-weight: normal; background: #1e293b; padding: 2px 6px; border-radius: 12px; }
+  
+  .chart-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+  /* Enlarged Stock Name */
+  .stock-name-title { font-size: 14px; color: var(--txt); font-weight: bold; background: #1e293b; padding: 4px 10px; border-radius: 6px; }
+  
   .warning-banner { background: #1e293b; border-left: 3px solid var(--blu); padding: 4px 10px; font-size: 10px; margin-bottom: 10px; border-radius: 5px; }
 </style>
 </head>
@@ -92,9 +101,9 @@
 <div class="wrap">
   <header>
     <div class="brand">
-      📡 QST Institutional Pro v12 
+      📡 QST Institutional 
       <span class="badge">GITHUB SERVERLESS</span>
-      <span id="lastRefreshTime" class="last-refresh">↻ last: --:--:--</span>
+      <span id="lastRefreshTime" class="last-refresh">Last Update: --:--:--</span>
     </div>
     <div class="meta">
       <span id="dot" class="dot closed"></span>
@@ -115,25 +124,44 @@
 
   <div class="split-layout">
     <div class="sec col-monitor">
-      <div class="sec-title">📈 Market Monitor <span style="font-weight:400">(click=select · dblclick=detail)</span></div>
+      <div class="sec-title">
+        <span>📈 Market Monitor <span style="font-weight:400">(click=select · dblclick=detail)</span></span>
+        <select id="monSort" class="sort-ctrl" onchange="renderMonitorGrid()">
+          <option value="default">Sort: Default</option>
+          <option value="name">Sort: Symbol (A-Z)</option>
+          <option value="percentDesc">Sort: % Chg (High to Low)</option>
+          <option value="percentAsc">Sort: % Chg (Low to High)</option>
+          <option value="signal">Sort: Signal (Buy to Sell)</option>
+        </select>
+      </div>
       <div id="monGrid" class="grid"><span class="timer">Reading Stock_List.txt...</span></div>
     </div>
     <div class="sec col-chart">
       <div class="chart-header">
-        <div class="sec-title" id="cTitle">Weekly Chart — <span style="color:var(--txt2)">Select symbol</span></div>
-        <div id="stockNameSub" class="stock-name-title"></div>
+        <div class="sec-title" id="cTitle" style="margin:0;">Weekly Chart — <span style="color:var(--txt2); font-size:16px; margin-left:6px;">Select symbol</span></div>
+        <div id="stockNameSub" class="stock-name-title" style="display:none;"></div>
       </div>
       <div id="chartBox"><div class="skel" id="cSkel">📊 Select stock to load weekly chart</div></div>
     </div>
   </div>
 
   <div class="sec">
-    <div class="sec-title">🔢 Quant Indicators + Technicals <span class="timer" id="indSt">—</span></div>
+    <div class="sec-title">
+        <span>🔢 Quant Indicators + Technicals <span class="timer" id="indSt" style="margin-left:8px; font-weight:normal;">—</span></span>
+    </div>
     <div class="ind-wrap" id="indWrap"><div class="timer" style="padding:4px;">Select a stock...</div></div>
   </div>
 
   <div class="sec">
-    <div class="sec-title">🔥 Daily Performance Heatmap (Real-Time Change %)</div>
+    <div class="sec-title">
+        <span>🔥 Daily Performance Heatmap</span>
+        <select id="heatSort" class="sort-ctrl" onchange="renderHeatmapReal()">
+          <option value="percentDesc">Sort: % Chg (High to Low)</option>
+          <option value="percentAsc">Sort: % Chg (Low to High)</option>
+          <option value="name">Sort: Symbol (A-Z)</option>
+          <option value="color">Sort: Color Magnitude</option>
+        </select>
+    </div>
     <div id="heatGrid" class="heat"></div>
   </div>
 
@@ -149,7 +177,6 @@
 // ======================== CONFIGURATION ========================
 const FINNHUB_KEY = "d2530epr01qns40ctr90d2530epr01qns40ctr9g";
 
-// Arrays dynamically populated from Stock_List.txt
 let STOCKS = [];
 let STOCK_NAMES = {};
 
@@ -176,36 +203,27 @@ let app = {
 // ======================== DYNAMIC FILE LOADER ========================
 async function loadStocksFromFile() {
   try {
-    // Adding nocache prevents the browser from holding onto old versions of your list
     const response = await fetch('Stock_List.txt?nocache=' + new Date().getTime());
     if (!response.ok) throw new Error("Could not read Stock_List.txt");
-    
     const text = await response.text();
     const lines = text.split('\n');
-    
     STOCKS = [];
     STOCK_NAMES = {};
-    
     lines.forEach(line => {
       const cleanLine = line.trim();
       if (cleanLine && !cleanLine.startsWith('#')) {
         const parts = cleanLine.split(',');
         const ticker = parts[0].trim().toUpperCase();
         const name = parts.length > 1 ? parts[1].trim() : ticker;
-        
-        STOCKS.push(ticker);
-        STOCK_NAMES[ticker] = name;
+        STOCKS.push(ticker); STOCK_NAMES[ticker] = name;
       }
     });
-    
-    console.log(`Loaded ${STOCKS.length} stocks from Stock_List.txt`);
   } catch (error) {
-    console.error(error);
     document.getElementById('monGrid').innerHTML = `<span style="color:var(--red)">Error: Could not load Stock_List.txt. Ensure the file is named correctly and uploaded to GitHub.</span>`;
   }
 }
 
-// Tooltip Management
+// Tooltips
 let activeTooltip = null;
 function showTooltip(text, x, y) {
   if(activeTooltip) activeTooltip.remove();
@@ -214,20 +232,18 @@ function showTooltip(text, x, y) {
   tooltip.innerHTML = text;
   document.body.appendChild(tooltip);
   const rect = tooltip.getBoundingClientRect();
-  let left = x;
-  let top = y - rect.height - 8;
+  let left = x; let top = y - rect.height - 8;
   if(top < 8) top = y + 20;
   if(left + rect.width > window.innerWidth - 10) left = window.innerWidth - rect.width - 10;
   if(left < 10) left = 10;
-  tooltip.style.left = left + 'px';
-  tooltip.style.top = top + 'px';
+  tooltip.style.left = left + 'px'; tooltip.style.top = top + 'px';
   activeTooltip = tooltip;
 }
 function hideTooltip() { if(activeTooltip) { activeTooltip.remove(); activeTooltip = null; } }
 
 function updateLastRefreshDisplay() {
   const el = document.getElementById('lastRefreshTime');
-  if(app.lastRefreshISO) el.textContent = `↻ last: ${new Date(app.lastRefreshISO).toLocaleTimeString()}`;
+  if(app.lastRefreshISO) el.textContent = `Last Update: ${new Date(app.lastRefreshISO).toLocaleTimeString()}`;
 }
 
 function getMarketStatus() {
@@ -301,7 +317,6 @@ async function fetchWeeklyCandles(symbol) {
     }
   } catch(e) {}
   
-  // Fallback synthetic candles if API fails
   const base = app.liveQuotes[symbol]?.c || 35;
   const candles = [];
   let lastClose = base;
@@ -366,28 +381,51 @@ function renderIndicatorsPanel(ind) {
   document.getElementById('indSt').innerHTML = '✅ real-time';
 }
 
+function getStockMetrics(sym) {
+  const quote = app.liveQuotes[sym];
+  if(!quote) return { dp: 0, compVal: 50, sigClass: 'h' };
+  let compVal = 50; let sigClass = 'h';
+  if(app.weeklyDataCache[sym]) {
+    compVal = Math.min(88, Math.max(12, 50 + (quote.dp * 0.8)));
+    if(compVal >= 62) sigClass = 'b'; else if(compVal <= 38) sigClass = 's';
+  } else {
+    if(quote.dp > 1.2) sigClass = 'b'; else if(quote.dp < -1.5) sigClass = 's';
+  }
+  return { dp: quote.dp, compVal, sigClass };
+}
+
 function renderMonitorGrid() {
   const container = document.getElementById('monGrid');
   if(!container) return;
   container.innerHTML = '';
-  STOCKS.forEach(sym => {
+  const sortType = document.getElementById('monSort')?.value || 'default';
+  
+  let sortedStocks = [...STOCKS];
+  if(sortType !== 'default') {
+      sortedStocks.sort((a, b) => {
+          const m1 = getStockMetrics(a);
+          const m2 = getStockMetrics(b);
+          if(sortType === 'name') return a.localeCompare(b);
+          if(sortType === 'percentDesc') return m2.dp - m1.dp;
+          if(sortType === 'percentAsc') return m1.dp - m2.dp;
+          if(sortType === 'signal') return m2.compVal - m1.compVal;
+      });
+  }
+
+  sortedStocks.forEach(sym => {
     const quote = app.liveQuotes[sym];
     if(!quote) return;
+    const metrics = getStockMetrics(sym);
     const isPos = quote.dp >= 0;
-    let sigClass = 'h', compVal = 50;
-    if(app.weeklyDataCache[sym]) {
-      compVal = Math.min(88, Math.max(12, 50 + (quote.dp * 0.8)));
-      if(compVal >= 62) sigClass = 'b'; else if(compVal <= 38) sigClass = 's';
-    } else {
-      if(quote.dp > 1.2) sigClass = 'b'; else if(quote.dp < -1.5) sigClass = 's';
-    }
     
     const card = document.createElement('div');
     card.className = `card ${app.selected === sym ? 'sel' : ''}`;
     card.innerHTML = `
-      <div class="sym">${sym} <span class="sig ${sigClass}">${sigClass==='b'?'BUY':sigClass==='s'?'SELL':'HOLD'} ${Math.round(compVal)}%</span></div>
-      <div class="pr">$${quote.c.toFixed(2)}</div>
-      <div class="chg ${isPos ? 'p' : 'n'}">${isPos?'+':''}${quote.dp.toFixed(2)}%</div>
+      <div class="sym">${sym} <span class="sig ${metrics.sigClass}">${metrics.sigClass==='b'?'BUY':metrics.sigClass==='s'?'SELL':'HOLD'} ${Math.round(metrics.compVal)}%</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:6px;">
+        <div class="pr" style="margin:0;">$${quote.c.toFixed(2)}</div>
+        <div class="chg ${isPos ? 'p' : 'n'}">${isPos?'+':''}${quote.dp.toFixed(2)}%</div>
+      </div>
     `;
     card.onclick = () => selectSymbol(sym);
     card.ondblclick = () => openDetailModal(sym);
@@ -398,9 +436,20 @@ function renderMonitorGrid() {
 function renderHeatmapReal() {
   const heatDiv = document.getElementById('heatGrid');
   heatDiv.innerHTML = '';
-  STOCKS.forEach(sym => {
+  const sortType = document.getElementById('heatSort')?.value || 'percentDesc';
+  
+  let sortedStocks = [...STOCKS].filter(sym => app.liveQuotes[sym]);
+  sortedStocks.sort((a, b) => {
+      const qA = app.liveQuotes[a].dp || 0;
+      const qB = app.liveQuotes[b].dp || 0;
+      if(sortType === 'name') return a.localeCompare(b);
+      if(sortType === 'percentDesc') return qB - qA;
+      if(sortType === 'percentAsc') return qA - qB;
+      if(sortType === 'color') return Math.abs(qB) - Math.abs(qA);
+  });
+
+  sortedStocks.forEach(sym => {
     const quote = app.liveQuotes[sym];
-    if(!quote) return;
     const chg = quote.dp || 0;
     const intensity = Math.min(Math.abs(chg)/12, 0.8) + 0.15;
     const bg = chg >= 0 ? `rgba(34,197,94,${intensity})` : `rgba(239,68,68,${intensity})`;
@@ -420,8 +469,12 @@ function renderHeatmapReal() {
 async function selectSymbol(sym) {
   app.selected = sym;
   renderMonitorGrid();
-  document.getElementById('cTitle').innerHTML = `Weekly Chart — <span style="color:var(--blu)">${sym}</span>`;
-  document.getElementById('stockNameSub').innerHTML = STOCK_NAMES[sym] || sym;
+  
+  // Enlarged Chart Header processing
+  document.getElementById('cTitle').innerHTML = `Weekly Chart — <span style="color:var(--blu); font-size:16px;">${sym}</span>`;
+  const nameEl = document.getElementById('stockNameSub');
+  nameEl.innerHTML = STOCK_NAMES[sym] || sym;
+  nameEl.style.display = 'block'; // Make visible after selection
   
   const wkData = await fetchWeeklyCandles(sym);
   if(!app.chart) initChart();
@@ -443,18 +496,42 @@ function initChart() {
   app.candlestickSeries = app.chart.addCandlestickSeries({ upColor: '#22c55e', downColor: '#ef4444' });
 }
 
-function openDetailModal(sym) {
+// Modal augmented to include fully computed indicators
+async function openDetailModal(sym) {
   const quote = app.liveQuotes[sym];
   document.getElementById('mTitle').innerHTML = `${sym} — ${STOCK_NAMES[sym] || sym}`;
   document.getElementById('mBody').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
       <div><strong>Last Price</strong><br><span style="font-size:20px;">$${quote?.c?.toFixed(2) || 'N/A'}</span></div>
       <div><strong>Daily Δ%</strong><br><span class="${quote?.dp>=0?'p':'n'}">${quote?.dp>=0?'+':''}${quote?.dp?.toFixed(2)||0}%</span></div>
-      <div><strong>Previous Close</strong><br>$${quote?.pc?.toFixed(2)||'—'}</div>
+      <div><strong>Prev Close</strong><br>$${quote?.pc?.toFixed(2)||'—'}</div>
       <div><strong>Market</strong><br>${app.isMarketOpen ? '🟢 Open' : '🔴 Closed'}</div>
     </div>
+    <div id="modalInd" style="text-align:center; font-size:11px; color:var(--txt2); margin-top:15px;">Calculating Quant Signals...</div>
   `;
   document.getElementById('ov').classList.add('act');
+  
+  // Calculate specific modal indicators dynamically
+  const weekly = await fetchWeeklyCandles(sym);
+  const ind = await computeIndicators(sym, quote?.c, weekly);
+  
+  let indHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:10px; padding-top:10px; border-top:1px solid var(--brd);">`;
+  INDICATORS.forEach(meta => {
+     let val = ind[meta.id] || '—';
+     if(meta.id === 'CMP') val = `${ind.CMP}%`;
+     const c = (meta.id==='CMP' && ind.CMP>60) ? 'var(--grn)' : (meta.id==='CMP' && ind.CMP<40) ? 'var(--red)' : 'inherit';
+     indHtml += `<div style="display:flex; justify-content:space-between; background:#0f131a; padding:4px 8px; border-radius:4px; font-size:10px;">
+                    <span>${meta.n}</span>
+                    <span style="color:${c}; font-weight:bold; font-family:monospace;">${val}</span>
+                 </div>`;
+  });
+  indHtml += `</div>`;
+  document.getElementById('modalInd').innerHTML = `<strong style="color:var(--txt); font-size:12px;">Technical Quant Signals</strong>` + indHtml;
+}
+
+function renderGuideStatic() {
+  const guideDiv = document.getElementById('guideGrid');
+  guideDiv.innerHTML = INDICATORS.map(i => `<div class="gi"><h4>${i.n}</h4><p>${i.t}</p></div>`).join('');
 }
 
 let countdownSecs = 30*60;
@@ -470,16 +547,14 @@ function startRefreshTimer() {
   }, 1000);
 }
 
-document.getElementById('guideGrid').innerHTML = INDICATORS.map(i => `<div class="gi"><h4>${i.n}</h4><p>${i.t}</p></div>`).join('');
 document.getElementById('rBtn').onclick = () => { countdownSecs = 30*60; refreshAllQuotes(); };
 document.getElementById('mClose').onclick = () => document.getElementById('ov').classList.remove('act');
 document.getElementById('ov').onclick = e => { if(e.target === e.currentTarget) document.getElementById('ov').classList.remove('act'); };
 
 async function init() {
-  // 1. Read the list of stocks from the text file first
+  renderGuideStatic();
   await loadStocksFromFile();
   
-  // 2. Once loaded, fetch the data
   if (STOCKS.length > 0) {
     await refreshAllQuotes();
     selectSymbol(STOCKS[0]);
@@ -488,7 +563,6 @@ async function init() {
   startRefreshTimer();
   updateMarketUI();
   
-  // Check for background updates every 15 seconds during market hours
   setInterval(async () => {
     if(app.isMarketOpen) {
       await refreshAllQuotes();
