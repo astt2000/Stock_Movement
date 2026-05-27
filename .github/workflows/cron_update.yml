@@ -25,11 +25,13 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-
+      
     - name: Install Scientific Analytics Dependencies
       run: |
-        python -bin/pip install --upgrade pip
+        python -m pip install --upgrade pip
         pip install yfinance pandas
+        
+        
 
     - name: Execute Live Technical Calculations
       run: python update_stocks.py
