@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Technical Trading Allocation Dashboard</title>
+<title>Institutional Trading Intelligence Terminal</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;color:#2c2c2c;line-height:1.45}
@@ -16,58 +16,43 @@ header h1{font-size:13pt;font-weight:700;letter-spacing:-.3px}
 .hdr-left{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .hdr-meta{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:8.5pt;color:#ffcc00;font-weight:600}
 
-/* Toggle Switch Controls */
 .toggle-container { display:flex; gap:4px; background:rgba(0,0,0,0.2); padding:4px; border-radius:6px; }
 .toggle-btn {
   background:none; border:none; color:#fff; padding:6px 12px; font-size:8.5pt; font-weight:600;
   cursor:pointer; border-radius:4px; transition: all 0.2s;
 }
 .toggle-btn.active { background:#fff; color:#1a2a6c; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
-
 .status-badge { background:rgba(255,255,255,0.15); color:white; padding:4px 10px; border-radius:4px; font-size:8.5pt; font-weight:600; display:flex; align-items:center; gap:6px; margin-left:auto}
 .status-dot { width:7px; height:7px; background:#2ecc71; border-radius:50%; display:inline-block; }
 
 .page{padding:10px 14px; max-width:1160px; margin:0 auto}
+
+/* Search Engine Control Bar Styles */
+.search-container {
+  background: #ffffff; padding: 10px; border-radius: 6px; margin: 10px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 8px;
+}
+.search-bar {
+  width: 100%; padding: 8px 12px; font-size: 9pt; border: 1px solid #ccd1d9;
+  border-radius: 4px; outline: none; transition: border 0.2s;
+}
+.search-bar:focus { border-color: #1a2a6c; box-shadow: 0 0 4px rgba(26,42,108,0.15); }
+
 h2{color:#1a2a6c; border-bottom:2px solid #b21f1f; padding-bottom:3px; margin:14px 0 7px; font-size:11pt}
 
-/* Mobile Friendly Table Wrappers */
 .table-wrap{border-radius:7px; overflow-x:auto; box-shadow:0 1px 4px rgba(0,0,0,.1); margin-bottom:9px; background:#fff; -webkit-overflow-scrolling:touch;}
 table{width:100%; border-collapse:collapse; font-size:9pt; min-width:700px;}
 th,td{border-bottom:1px solid #e4e7eb; padding:8px 10px; text-align:left; vertical-align:middle}
 th{background:#1a2a6c; color:#fff; font-weight:600; cursor:pointer; user-select:none; white-space:nowrap; position:relative}
 th:hover{background:#243898}
 
-/* Robust Fixed Table Header Tooltip System */
-.th-tooltip {
-  position: relative;
-  display: inline-block;
-  border-bottom: 1px dashed #ffcc00;
-}
+.th-tooltip { position: relative; display: inline-block; border-bottom: 1px dashed #ffcc00; }
 .th-tooltip .tooltiptext {
-  visibility: hidden;
-  width: 250px;
-  background-color: #222222;
-  color: #ffffff;
-  text-align: left;
-  border-radius: 6px;
-  padding: 10px;
-  position: absolute;
-  z-index: 999;
-  top: 130%;
-  left: 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  font-size: 8pt;
-  font-weight: normal;
-  white-space: normal;
-  line-height: 1.4;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
+  visibility: hidden; width: 250px; background-color: #222222; color: #ffffff;
+  border-radius: 6px; padding: 10px; position: absolute; z-index: 999; top: 130%; left: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 8pt; font-weight: normal; white-space: normal; line-height: 1.4; opacity: 0; transition: opacity 0.2s ease;
 }
-.th-tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-}
+.th-tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
 
 .si{font-size:8px; margin-left:4px; opacity:.6}
 th.sa .si::after{content:' ↑'; color:#ffcc00}
@@ -80,9 +65,9 @@ tr:hover td{background:#edf0f8}
 
 .bull{color:#1d7a45; font-weight:700}.bear{color:#b21f1f; font-weight:700}.neut{color:#a06500; font-weight:700}
 
-/* Adaptive Responsive Grid layout */
 .card-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px}
-.dc{background:#fff; border-radius:6px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,.08); border-top:3px solid #ddd; transition: background 0.3s;}
+.dc{background:#fff; border-radius:6px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,.08); border-top:3px solid #ddd; cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;}
+.dc:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.12); }
 .dc.bull{border-top-color:#1d7a45}.dc.bear{border-top-color:#b21f1f}.dc.neut{border-top-color:#a06500}
 .dch{display:flex; justify-content:space-between; align-items:flex-start; gap:6px; margin-bottom:4px}
 .dcsym{font-size:11pt; font-weight:700; color:#1a2a6c; line-height:1.1}
@@ -102,31 +87,38 @@ tr:hover td{background:#edf0f8}
 .decision-box.act-sell { border-left-color:#b21f1f; background:#fff2f2; }
 .decision-box.act-hold { border-left-color:#a06500; background:#fffdea; }
 
-/* 90%+ Confidence Soft Blinking Alert Keyframes */
 @keyframes softBlinkPulse {
   0% { background-color: #ffffff; }
   50% { background-color: #eafbee; box-shadow: 0 0 8px rgba(46, 204, 113, 0.4); }
   100% { background-color: #ffffff; }
 }
-.pulse-alert {
-  animation: softBlinkPulse 2s infinite ease-in-out;
-  border-top-width: 4px !important;
-}
+.pulse-alert { animation: softBlinkPulse 2s infinite ease-in-out; border-top-width: 4px !important; }
 
 .lvs{display:flex; gap:4px; flex-wrap:wrap}
 .lv{font-size:7.5pt; font-weight:700; padding:2px 7px; border-radius:3px}
 .ls{background:#e8f5ed; color:#1d7a45}.lr{background:#fde8e8; color:#b21f1f}.lt{background:#e8edf8;color:#1a2a6c}
 
-/* Custom Expandable Interactive Accordion Panel */
-.accordion-section {
-  background: #ffffff; border-radius: 6px; margin-top: 15px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden;
+/* TradingView Charting Lightbox Pop-up System Styles */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);
+  z-index: 10000; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 12px;
 }
-.accordion-header {
-  background: #edf1f7; padding: 10px 14px; font-size: 9.5pt; font-weight: 700;
-  color: #1a2a6c; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-  user-select: none;
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal-content {
+  background: #ffffff; width: 100%; max-width: 880px; height: 80vh; border-radius: 8px;
+  overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  transform: scale(0.95); transition: transform 0.25s ease;
 }
+.modal-overlay.open .modal-content { transform: scale(1); }
+.modal-header { background: #1a2a6c; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+.modal-title { font-size: 11pt; font-weight: 700; }
+.modal-close { background: none; border: none; color: white; font-size: 16pt; cursor: pointer; opacity: 0.8; }
+.modal-close:hover { opacity: 1; }
+.chart-container-wrapper { flex: 1; width: 100%; height: 100%; background: #f8fafc; }
+
+.accordion-section { background: #ffffff; border-radius: 6px; margin-top: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+.accordion-header { background: #edf1f7; padding: 10px 14px; font-size: 9.5pt; font-weight: 700; color: #1a2a6c; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
 .accordion-header::after { content: '📂 Expand Education Suite'; font-size: 8pt; color: #444; background: #fff; padding: 2px 8px; border-radius: 4px; border: 1px solid #ccc; }
 .accordion-section.open .accordion-header::after { content: '📁 Collapse Panel'; }
 .accordion-content { display: none; padding: 14px; font-size: 8.5pt; color: #333; line-height: 1.6; border-top: 1px solid #e2e8f0; }
@@ -149,7 +141,7 @@ tr:hover td{background:#edf0f8}
 
 <header>
   <div class="hdr-left">
-    <h1>Multi-API Dynamic Stock Dashboard</h1>
+    <h1>Institutional Trading Terminal</h1>
     <div class="toggle-container">
       <button id="btnList1" class="toggle-btn active" onclick="switchList(1)">Stock List 1</button>
       <button id="btnList2" class="toggle-btn" onclick="switchList(2)">Stock List 2</button>
@@ -162,6 +154,10 @@ tr:hover td{background:#edf0f8}
 </header>
 
 <div class="page">
+  <div class="search-container">
+    <input type="text" id="dashboardSearch" class="search-bar" placeholder="🔍 Instant Registry Filter: Type symbol code or corporate profile name here..." oninput="handleSearchFilter()">
+  </div>
+
   <h2>Real-Time Market Tracking View</h2>
   <div class="table-wrap">
     <table id="stockTable">
@@ -186,45 +182,46 @@ tr:hover td{background:#edf0f8}
         </tr>
       </thead>
       <tbody id="tb">
-        <tr><td colspan="7" style="text-align:center;padding:20px;">Synchronizing structural data boundaries...</td></tr>
+        <tr><td colspan="7" style="text-align:center;padding:20px;">Synchronizing calculations...</td></tr>
       </tbody>
     </table>
   </div>
 
-  <h2>Detailed Performance Profiles & AI Intelligence Allocation Models</h2>
+  <h2>Detailed Performance Profiles & AI Intelligence Allocation Models <span style="font-size:7.5pt;font-weight:normal;color:#666;">(Click any profile card to view full interactive chart)</span></h2>
   <div class="card-grid" id="cg"></div>
 
   <div class="accordion-section" id="eduSuite">
     <div class="accordion-header" onclick="toggleAccordion()">System Legend & Financial Metrics Specification Matrix</div>
     <div class="accordion-content">
-      
       <div class="edu-block">
         <div class="edu-title"><span>1</span> Price Threshold Parameters (SUP, RES, TGT)</div>
-        <p>These values establish predictive psychological parameters mapped from immediate price distribution channels:</p>
-        <p>• <strong>SUP (Support Level - 95% anchor):</strong> The price baseline "floor". Buyer accumulation typically increases here to protect downside breakdown.</p>
-        <p>• <strong>RES (Resistance Level - 104% anchor):</strong> The price channel "ceiling". Technical selling pressure increases as short-term traders liquidate gains.</p>
-        <p>• <strong>TGT (Target Level - 110% anchor):</strong> The medium-term momentum pattern target objective upon a clean resistance breakout.</p>
-        <div class="edu-ex">EXAMPLE: If Nvidia (NVDA) ticks at $100.00:<br>SUP = $95.00 (Stop-loss floor) | RES = $104.00 (Take-profit celling) | TGT = $110.00 (Breakout objective)</div>
+        <p>• <strong>SUP (Support Level - 95% anchor):</strong> The price floor where buyer demand thickens to stall liquidation trends.</p>
+        <p>• <strong>RES (Resistance Level - 104% anchor):</strong> The price ceiling where supply clusters and traders lock in short-term returns.</p>
+        <p>• <strong>TGT (Target Level - 110% anchor):</strong> Technical target cycle milestone upon a successful volume-backed breakout.</p>
       </div>
-
       <div class="edu-block">
         <div class="edu-title"><span>2</span> RSI-14 Index (Relative Strength Index)</div>
-        <p>A high-fidelity momentum oscillator bounding velocity structures between 0 and 100 over a 14-period envelope:</p>
-        <p>• <strong>Value &ge; 65:</strong> Asset is technically overbought. Momentum velocity may be overextended, triggering distribution blocks.</p>
-        <p>• <strong>Value &le; 35:</strong> Asset is technically oversold. Liquidation trends are exhausted, opening channel entries for accumulation cycles.</p>
-        <div class="edu-ex">EXAMPLE: NVDA climbs +8% instantly pushing RSI to 72. System flags an Overbought condition warning of near-term mean reversion risks.</div>
+        <p>Tracks actual directional acceleration vectors using a mathematical 14-day historical exponential close lookback:</p>
+        <p>• <strong>Value &ge; 65:</strong> Overextended channel footprint; technical probability favors profit-taking or cooling phases.</p>
+        <p>• <strong>Value &le; 35:</strong> Heavily oversold; sell walls depleted, signaling potential value accumulation entry setups.</p>
       </div>
-
       <div class="edu-block">
         <div class="edu-title"><span>3</span> MACD Structural Phase (Moving Average Convergence Divergence)</div>
-        <p>Tracks velocity shifts between short-term exponential parameters and trend baselines:</p>
-        <p>• <strong>Bullish Crossover:</strong> Triggered when positive daily variance moves above 0.5%, signaling expanding upside velocity.</p>
-        <p>• <strong>Bearish Realignment:</strong> Triggered when daily variance slides below -0.5%, signaling downside rotation parameters.</p>
-        <p>• <strong>Neutral Phase:</strong> Triggered inside the -0.5% to +0.5% consolidation boundaries, signaling range-bound tightening vectors.</p>
-        <div class="edu-ex">EXAMPLE: If NVDA falls -2.4%, MACD switches to "Bearish Realignment", shifting the overall suggested execution signal toward "SELL".</div>
+        <p>Tracks standard cross-momentum changes using a 12-day vs 26-day EMA mathematical spread grid:</p>
+        <p>• <strong>Bullish Crossover / Momentum:</strong> Short-term momentum climbs above trailing baseline averages, confirming upside velocity expansion rules.</p>
+        <p>• <strong>Bearish Realignment / Momentum:</strong> Trend vectors tilt downward, establishing systematic distribution risk parameters.</p>
       </div>
-
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="chartModal" onclick="closeChartModal(event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title" id="modalStockTitle">TradingView Analysis Console</span>
+      <button class="modal-close" onclick="forceCloseModal()">&times;</button>
+    </div>
+    <div class="chart-container-wrapper" id="tvChartContainer"></div>
   </div>
 </div>
 
@@ -270,24 +267,24 @@ const stockNames = {
 
 function calculateActionMatrix(price, rsiVal, macdStr, change) {
   let sentiment = 'neut', label = 'Neutral Framework', decision = 'HOLD', conf = '60%', styleClass = 'act-hold';
-  let an = 'Price channels consolidate within balanced technical fields.', out = 'Monitor structural ranges.';
-  
+  let an = 'Price channels consolidate within balanced technical fields.';
   let structuralScore = 0;
-  if (rsiVal <= 35) structuralScore += 2;
-  if (rsiVal >= 65) structuralScore -= 2;
+  
+  if (rsiVal <= 38) structuralScore += 2;
+  if (rsiVal >= 62) structuralScore -= 2;
   if (macdStr.includes('Bull')) structuralScore += 2;
   if (macdStr.includes('Bear')) structuralScore -= 2;
 
   if (structuralScore >= 2) {
     sentiment = 'bull'; label = 'Bullish Accumulation'; decision = 'BUY'; styleClass = 'act-buy';
-    conf = structuralScore >= 4 ? '92%' : '74%';
-    an = 'Accumulation channels expanding technical velocity upside.'; out = 'Target parameters scaling.';
+    conf = structuralScore >= 4 ? '94%' : '76%';
+    an = 'True indicators match macro upside entries.';
   } else if (structuralScore <= -2) {
     sentiment = 'bear'; label = 'Bearish Distribution'; decision = 'SELL'; styleClass = 'act-sell';
     conf = structuralScore <= -4 ? '95%' : '78%';
-    an = 'Distribution blocks sizing up technical downside pressure.'; out = 'Risk mitigation suggested.';
+    an = 'Lookbacks confirm heavy distribution pressure.';
   }
-  return { s: sentiment, sl: label, decision, confidence: conf, styleClass, an, out, sup: (price * 0.95).toFixed(2), res: (price * 1.04).toFixed(2), tgt: (price * 1.10).toFixed(2) };
+  return { s: sentiment, sl: label, decision, confidence: conf, styleClass, an, sup: (price * 0.95).toFixed(2), res: (price * 1.04).toFixed(2), tgt: (price * 1.10).toFixed(2) };
 }
 
 const sCol={bull:'#1d7a45',bear:'#b21f1f',neut:'#a06500'};
@@ -318,11 +315,9 @@ function renderUI() {
     </tr>`).join('');
 
   document.getElementById('cg').innerHTML = displayData.map(r=> {
-    const isHighConfidence = parseInt(r.confidence) >= 90;
-    const blinkClass = isHighConfidence ? 'pulse-alert' : '';
-    
+    const blinkClass = parseInt(r.confidence) >= 90 ? 'pulse-alert' : '';
     return `
-    <div class="dc ${r.s} ${blinkClass}">
+    <div class="dc ${r.s} ${blinkClass}" onclick="openTradingViewChart('${r.sym}', '${r.fullName}')">
       <div class="dch">
         <div>
           <span class="dcsym">${r.sym}</span>
@@ -334,7 +329,6 @@ function renderUI() {
           <span class="chg ${r.change >= 0 ? 'up':'dn'}">${r.change >= 0 ? '+':''}${r.change.toFixed(2)}%</span>
         </div>
       </div>
-      
       <div class="decision-box ${r.styleClass}">
         <span>SIGNAL: <strong>${r.decision}</strong></span>
         <span>CONFIDENCE: <strong>${r.confidence}</strong></span>
@@ -353,10 +347,17 @@ function switchList(listNumber) {
   currentActiveList = listNumber;
   document.getElementById('btnList1').classList.toggle('active', listNumber === 1);
   document.getElementById('btnList2').classList.toggle('active', listNumber === 2);
-  
+  applyListAndFilterEngine();
+}
+
+function handleSearchFilter() {
+  applyListAndFilterEngine();
+}
+
+function applyListAndFilterEngine() {
   if (!rawPayload) return;
-  
-  const activeSymbols = listNumber === 1 ? rawPayload.list1_symbols : rawPayload.list2_symbols;
+  const searchStr = document.getElementById('dashboardSearch').value.toLowerCase().trim();
+  const activeSymbols = currentActiveList === 1 ? rawPayload.list1_symbols : rawPayload.list2_symbols;
   
   displayData = activeSymbols
     .filter(sym => rawPayload.registry[sym])
@@ -365,17 +366,41 @@ function switchList(listNumber) {
       const fullName = stockNames[sym] || "Global Equity Asset";
       const logic = calculateActionMatrix(r.price, r.rsi, r.macdStr, r.change);
       return { ...r, ...logic, fullName };
+    })
+    .filter(item => {
+      if (!searchStr) return true;
+      return item.sym.toLowerCase().includes(searchStr) || item.fullName.toLowerCase().includes(searchStr);
     });
     
-  lastSortedCol = -1; 
   renderUI();
+}
+
+/* Embeddable Iframe Integration Module for TradingView Widgets */
+function openTradingViewChart(symbol, name) {
+  document.getElementById('modalStockTitle').innerText = `${symbol} - ${name} Interactive Candle Technical Chart`;
+  const container = document.getElementById('tvChartContainer');
+  
+  // Render TradingView interactive chart widget instance seamlessly
+  container.innerHTML = `
+    <iframe style="width:100%; height:100%; border:none; margin:0; padding:0;" 
+      src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=${symbol}&interval=D&symboledit=0&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=light&style=1&timezone=Exchange&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=${symbol}">
+    </iframe>`;
+    
+  document.getElementById('chartModal').classList.add('open');
+}
+
+function closeChartModal(event) {
+  if (event.target.id === 'chartModal') forceCloseModal();
+}
+function forceCloseModal() {
+  document.getElementById('chartModal').classList.remove('open');
+  document.getElementById('tvChartContainer').innerHTML = ""; // Unload iframe context instantly to clean device threads
 }
 
 function sortTable(columnIndex) {
   if (displayData.length === 0) return;
   sortDirection = (lastSortedCol === columnIndex) ? -sortDirection : 1;
   lastSortedCol = columnIndex;
-
   const headers = document.querySelectorAll("#stockTable th");
   headers.forEach((h, idx) => { h.classList.remove("sa", "sd"); if (idx === columnIndex) h.classList.add(sortDirection === 1 ? "sa" : "sd"); });
 
@@ -396,24 +421,18 @@ function sortTable(columnIndex) {
   renderUI();
 }
 
-function toggleAccordion() {
-  document.getElementById('eduSuite').classList.toggle('open');
-}
+function toggleAccordion() { document.getElementById('eduSuite').classList.toggle('open'); }
 
 async function loadLocalJson() {
   try {
     const res = await fetch('./live_market.json', { cache: "no-store" });
     rawPayload = await res.json();
-    
-    // Render dynamic extraction timestamp from JSON database feed
     document.getElementById('liveTimestamp').innerText = rawPayload.sync_timestamp || "No Trace Captured";
-    
-    switchList(currentActiveList);
+    applyListAndFilterEngine();
   } catch (err) {
     document.getElementById('liveTimestamp').innerText = "Awaiting Payload Sync Ticks...";
   }
 }
-
 document.addEventListener('DOMContentLoaded', loadLocalJson);
 </script>
 </body>
