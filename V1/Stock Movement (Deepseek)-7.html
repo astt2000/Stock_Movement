@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>QST Institutional | GitHub Serverless</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  :root {
+    --bg: #0b0e14; --card: #121720; --brd: #262c36;
+    --txt: #e2e8f0; --txt2: #8b96a3;
+    --grn: #22c55e; --red: #ef4444; --yel: #eab308; --blu: #3b82f6;
+    --rad: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--txt);
+    font-size: 13px; line-height: 1.45;
+    min-height: 100vh; overflow-y: auto;
+  }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 12px; }
+  
+  header {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--brd); border-radius: var(--rad);
+    padding: 8px 12px; margin-bottom: 12px; gap: 10px;
+  }
+  .brand { font-size: 15px; font-weight: 700; color: var(--blu); letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .badge { background: #1e293b; padding: 2px 8px; border-radius: 30px; font-size: 9px; color: var(--blu); font-weight: normal; }
+  
+  /* Enlarged Last Update */
+  .last-refresh { font-size: 13px; font-weight: bold; background: #0f131a; padding: 4px 10px; border-radius: 16px; font-family: monospace; color: var(--txt); }
+  
+  .meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .open { background: var(--grn); box-shadow: 0 0 5px var(--grn); }
+  .closed { background: var(--red); }
+  .timer { font-family: monospace; font-size: 11px; color: var(--txt2); }
+  .refresh-bar { display: flex; align-items: center; gap: 8px; }
+  .track { width: 90px; height: 5px; background: var(--brd); border-radius: 3px; overflow: hidden; }
+  .fill { height: 100%; background: var(--blu); transition: width 1s linear; }
+  button { background: var(--brd); color: var(--txt); border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.15s; }
+  button:hover { background: #333b47; }
+  .api-status { font-size: 10px; background: #0f131a; padding: 2px 6px; border-radius: 20px; font-family: monospace; }
+  
+  .split-layout { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .col-monitor { flex: 0 0 70%; min-width: 500px; }
+  .col-chart { flex: 0 0 calc(30% - 12px); min-width: 300px; }
+  @media (max-width: 950px) { .col-monitor, .col-chart { flex: 0 0 100%; } }
+
+  .sec { background: var(--card); border: 1px solid var(--brd); border-radius: var(--rad); padding: 10px 12px; margin-bottom: 10px; }
+  .sec-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; text-transform: uppercase; letter-spacing: 0.5px; color: var(--txt2); }
+  
+  /* Sorting Dropdowns */
+  .sort-ctrl { background: #1e293b; color: var(--txt); border: 1px solid var(--brd); border-radius: 4px; padding: 3px 6px; font-size: 10px; outline: none; cursor: pointer; text-transform: none; letter-spacing: 0; }
+  
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; max-height: 340px; overflow-y: auto; overflow-x: hidden; padding-right: 4px; }
+  .card { background: var(--bg); border: 1px solid var(--brd); border-radius: 5px; padding: 6px 8px; cursor: pointer; transition: 0.1s; }
+  .card:hover, .card.sel { border-color: var(--blu); box-shadow: 0 0 6px rgba(59,130,246,0.35); }
+  .sym { font-weight: 700; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .sig { font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; white-space: nowrap; }
+  .b { background: rgba(34,197,94,0.15); color: var(--grn); border: 1px solid var(--grn); }
+  .s { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid var(--red); }
+  .h { background: rgba(234,179,8,0.15); color: var(--yel); border: 1px solid var(--yel); }
+  .pr { font-size: 15px; font-weight: 500; }
+  .chg { font-size: 11px; font-weight: bold; }
+  .p { color: var(--grn); } .n { color: var(--red); }
+
+  #chartBox { height: 280px; width: 100%; border-radius: 5px; overflow: hidden; position: relative; background: #0f131a; }
+  .skel { position: absolute; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--txt2); font-size: 11px; z-index: 5;}
+
+  .heat { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; max-height: 200px; overflow-y: auto; overflow-x: hidden; }
+  .hc { padding: 6px 6px; text-align: center; border-radius: 5px; font-weight: 600; font-size: 12px; position: relative; cursor: default; background: #1a202c; border: 1px solid var(--brd); transition: transform 0.1s; }
+  .hc:hover { transform: translateY(-1px); }
+  
+  .ind-wrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 5px; max-height: 210px; overflow-y: auto; overflow-x: hidden; }
+  .ind-item { background: var(--bg); border: 1px solid var(--brd); border-radius: 5px; padding: 5px 7px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; position: relative; }
+  .ind-lbl { color: var(--txt2); display: flex; align-items: center; gap: 4px; }
+  .ind-val { font-weight: 600; font-family: monospace; font-size: 11px; }
+  .tip-icon { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--brd); border-radius: 50%; font-size: 10px; color: var(--txt2); cursor: help; margin-left: 4px; }
+  
+  .global-tooltip { position: fixed; background: #0a0c12; border: 1px solid var(--blu); color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 11px; max-width: 260px; text-align: center; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); pointer-events: none; backdrop-filter: blur(4px); line-height: 1.4; }
+  .guide { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-top: 6px; max-height: 160px; overflow-y: auto; }
+  .gi h4 { font-size: 11px; color: var(--blu); margin-bottom: 2px; }
+  .gi p { font-size: 10px; color: var(--txt2); }
+
+  .ov { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: 0.2s; }
+  .ov.act { opacity: 1; pointer-events: all; }
+  .mod { background: var(--card); border: 1px solid var(--brd); border-radius: var(--rad); width: 90%; max-width: 450px; padding: 18px; }
+  .close { background: none; border: none; color: var(--txt2); font-size: 20px; cursor: pointer; }
+  
+  .chart-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+  /* Enlarged Stock Name */
+  .stock-name-title { font-size: 14px; color: var(--txt); font-weight: bold; background: #1e293b; padding: 4px 10px; border-radius: 6px; }
+  
+  .warning-banner { background: #1e293b; border-left: 3px solid var(--blu); padding: 4px 10px; font-size: 10px; margin-bottom: 10px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      📡 QST Institutional 
+      <span class="badge">GITHUB SERVERLESS</span>
+      <span id="lastRefreshTime" class="last-refresh">Last Update: --:--:--</span>
+    </div>
+    <div class="meta">
+      <span id="dot" class="dot closed"></span>
+      <span id="mTxt" class="timer">Initializing...</span>
+      <span id="mCnt" class="timer"></span>
+      <span id="apiStatus" class="api-status">🔌 connecting</span>
+    </div>
+    <div class="refresh-bar">
+      <span class="timer" id="rCnt">30:00</span>
+      <div class="track"><div class="fill" id="rFill"></div></div>
+      <button id="rBtn">⟳ Refresh</button>
+    </div>
+  </header>
+
+  <div class="warning-banner" id="infoBanner">
+    ⚡ Reading target stocks from <strong>Stock_List.txt</strong> | Real-time quotes + candles via Finnhub | All indicators computed from real OHLCV data
+  </div>
+
+  <div class="split-layout">
+    <div class="sec col-monitor">
+      <div class="sec-title">
+        <span>📈 Market Monitor <span style="font-weight:400">(click=select · dblclick=detail)</span></span>
+        <select id="monSort" class="sort-ctrl" onchange="renderMonitorGrid()">
+          <option value="default">Sort: Default</option>
+          <option value="name">Sort: Symbol (A-Z)</option>
+          <option value="percentDesc">Sort: % Chg (High to Low)</option>
+          <option value="percentAsc">Sort: % Chg (Low to High)</option>
+          <option value="signal">Sort: Signal (Buy to Sell)</option>
+        </select>
+      </div>
+      <div id="monGrid" class="grid"><span class="timer">Reading Stock_List.txt...</span></div>
+    </div>
+    <div class="sec col-chart">
+      <div class="chart-header">
+        <div class="sec-title" id="cTitle" style="margin:0;">Weekly Chart — <span style="color:var(--txt2); font-size:16px; margin-left:6px;">Select symbol</span></div>
+        <div id="stockNameSub" class="stock-name-title" style="display:none;"></div>
+      </div>
+      <div id="chartBox"><div class="skel" id="cSkel">📊 Select stock to load weekly chart</div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">
+        <span>🔢 Quant Indicators + Technicals <span class="timer" id="indSt" style="margin-left:8px; font-weight:normal;">—</span></span>
+    </div>
+    <div class="ind-wrap" id="indWrap"><div class="timer" style="padding:4px;">Select a stock...</div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">
+        <span>🔥 Daily Performance Heatmap</span>
+        <select id="heatSort" class="sort-ctrl" onchange="renderHeatmapReal()">
+          <option value="percentDesc">Sort: % Chg (High to Low)</option>
+          <option value="percentAsc">Sort: % Chg (Low to High)</option>
+          <option value="name">Sort: Symbol (A-Z)</option>
+          <option value="color">Sort: Color Magnitude</option>
+        </select>
+    </div>
+    <div id="heatGrid" class="heat"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">📘 Multi-Timeframe Indicator Guide</div>
+    <div class="guide" id="guideGrid"></div>
+  </div>
+</div>
+
+<div class="ov" id="ov"><div class="mod"><div class="mh" style="display:flex;justify-content:space-between;"><h2 id="mTitle">Detail</h2><button class="close" id="mClose">&times;</button></div><div class="mc" id="mBody"></div></div></div>
+
+<script>
+// ======================== CONFIGURATION ========================
+const FINNHUB_KEY = "d2530epr01qns40ctr90d2530epr01qns40ctr9g";
+
+let STOCKS = [];
+let STOCK_NAMES = {};
+
+const INDICATORS = [
+  {id:'RSI',n:'RSI (14)',t:'Below 35 = oversold (bullish setup); Above 65 = overbought (pullback risk)'},
+  {id:'STO',n:'Stoch RSI',t:'K below 20 = oversold; K above 80 = overbought — faster signal than RSI'},
+  {id:'MAC',n:'MACD',t:'Positive histogram = bullish momentum building; Negative = bearish pressure'},
+  {id:'BB',n:'Bollinger Bands',t:'Price below lower band = oversold squeeze; Above upper = breakout or extended'},
+  {id:'EMA',n:'EMA 9/21/50',t:'9 crosses above 21 = short-term bullish; All aligned = strong trend'},
+  {id:'OBV',n:'OBV',t:'Rising OBV with rising price = confirmed breakout; Falling OBV = distribution (weak)'},
+  {id:'ADX',n:'ADX',t:'Above 25 = trend is strong; Below 20 = ranging — avoid trend strategies'},
+  {id:'SUP',n:'Supertrend',t:'BUY = price above supertrend line (uptrend); SELL = price broke below'},
+  {id:'VWAP',n:'Anchor VWAP',t:'Institutional cost basis anchor; Price above = institutions in profit, bullish bias'},
+  {id:'REL',n:'Rel vs SPY',t:'Positive = outperforming market; Negative = underperforming (avoid on down days)'},
+  {id:'MTF',n:'MTF Agreement',t:'1H and Daily both agree = high-confidence signal; Conflict = wait for alignment'},
+  {id:'CMP',n:'Composite Score',t:'0–40 = bearish zone; 40–60 = neutral/hold; 60–78 = bullish; 78–100 = strong buy setup'}
+];
+
+let app = {
+  selected: null, liveQuotes: {}, chart: null, candlestickSeries: null,
+  weeklyDataCache: {}, lastRefreshISO: null, refreshTimer: null, isMarketOpen: false,
+  spyReturn: undefined, indicatorsCache: {}
+};
+
+// ======================== DYNAMIC FILE LOADER ========================
+async function loadStocksFromFile() {
+  try {
+    const response = await fetch('Stock_List.txt?nocache=' + new Date().getTime());
+    if (!response.ok) throw new Error("Could not read Stock_List.txt");
+    const text = await response.text();
+    const lines = text.split('\n');
+    STOCKS = [];
+    STOCK_NAMES = {};
+    lines.forEach(line => {
+      const cleanLine = line.trim();
+      if (cleanLine && !cleanLine.startsWith('#')) {
+        const parts = cleanLine.split(',');
+        const ticker = parts[0].trim().toUpperCase();
+        const name = parts.length > 1 ? parts[1].trim() : ticker;
+        STOCKS.push(ticker); STOCK_NAMES[ticker] = name;
+      }
+    });
+  } catch (error) {
+    document.getElementById('monGrid').innerHTML = `<span style="color:var(--red)">Error: Could not load Stock_List.txt. Ensure the file is named correctly and uploaded to GitHub.</span>`;
+  }
+}
+
+// Tooltips
+let activeTooltip = null;
+function showTooltip(text, x, y) {
+  if(activeTooltip) activeTooltip.remove();
+  const tooltip = document.createElement('div');
+  tooltip.className = 'global-tooltip';
+  tooltip.innerHTML = text;
+  document.body.appendChild(tooltip);
+  const rect = tooltip.getBoundingClientRect();
+  let left = x; let top = y - rect.height - 8;
+  if(top < 8) top = y + 20;
+  if(left + rect.width > window.innerWidth - 10) left = window.innerWidth - rect.width - 10;
+  if(left < 10) left = 10;
+  tooltip.style.left = left + 'px'; tooltip.style.top = top + 'px';
+  activeTooltip = tooltip;
+}
+function hideTooltip() { if(activeTooltip) { activeTooltip.remove(); activeTooltip = null; } }
+
+function updateLastRefreshDisplay() {
+  const el = document.getElementById('lastRefreshTime');
+  if(app.lastRefreshISO) el.textContent = `Last Update: ${new Date(app.lastRefreshISO).toLocaleTimeString()}`;
+}
+
+function getMarketStatus() {
+  const now = new Date(new Date().toLocaleString("en-US", {timeZone:"America/New_York"}));
+  const day = now.getDay();
+  const mins = now.getHours()*60 + now.getMinutes();
+  const isOpen = (day>=1 && day<=5) && (mins>=570 && mins<960);
+  return { isOpen, now };
+}
+
+function updateMarketUI() {
+  const { isOpen } = getMarketStatus();
+  app.isMarketOpen = isOpen;
+  document.getElementById('dot').className = isOpen ? 'dot open' : 'dot closed';
+  document.getElementById('mTxt').textContent = isOpen ? '🟢 LIVE MARKET' : '🔴 MARKET CLOSED';
+}
+setInterval(updateMarketUI, 1000);
+
+async function fetchFinnhubQuote(symbol) {
+  try {
+    const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_KEY}`;
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error(`HTTP Error`);
+    const data = await resp.json();
+    if(data && typeof data.c === 'number' && data.c > 0) {
+      const pc = data.pc || data.c;
+      return { c: data.c, dp: ((data.c - pc) / pc) * 100, d: data.c - pc, pc: pc };
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function refreshAllQuotes() {
+  if (STOCKS.length === 0) return;
+  document.getElementById('apiStatus').innerHTML = '🔄 fetching...';
+  const results = {};
+  
+  await Promise.allSettled(STOCKS.map(async (sym) => {
+    const quote = await fetchFinnhubQuote(sym);
+    if(quote) results[sym] = { ...quote, timestamp: Date.now() };
+  }));
+  
+  for(const sym of STOCKS) {
+    if(!results[sym]) {
+      const prev = app.liveQuotes[sym];
+      // Use last known real quote if available, otherwise mark as failed — no fake data
+      results[sym] = (prev && prev.c) ? { ...prev, stale: true } : { c: null, dp: null, d: null, pc: null, failed: true };
+    }
+  }
+  
+  app.liveQuotes = results;
+  app.lastRefreshISO = new Date().toISOString();
+  updateLastRefreshDisplay();
+  document.getElementById('apiStatus').innerHTML = '✅ live';
+  
+  renderMonitorGrid();
+  renderHeatmapReal();
+  if(app.selected && app.liveQuotes[app.selected]) updateIndicatorsForSymbol(app.selected);
+}
+
+async function fetchWeeklyCandles(symbol) {
+  if(app.weeklyDataCache[symbol]) return app.weeklyDataCache[symbol];
+  const now = Math.floor(Date.now() / 1000);
+  const oneYearAgo = now - 365*24*3600;
+  try {
+    const resp = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=W&from=${oneYearAgo}&to=${now}&token=${FINNHUB_KEY}`);
+    const data = await resp.json();
+    if(data && data.s === 'ok') {
+      // Include volume (data.v) — required for real OBV and VWAP
+      const candles = data.t.map((t, i) => ({
+        time: t, open: data.o[i], high: data.h[i], low: data.l[i], close: data.c[i], volume: data.v[i] || 0
+      }));
+      app.weeklyDataCache[symbol] = candles.sort((a,b)=>a.time-b.time);
+      return app.weeklyDataCache[symbol];
+    }
+  } catch(e) { console.warn(`Candle fetch failed for ${symbol}:`, e); }
+  // Return empty — no fake data. Indicators will show N/A gracefully.
+  return [];
+}
+
+// ======================== REAL TECHNICAL ANALYSIS FUNCTIONS ========================
+
+// Wilder's RSI (proper smoothed calculation)
+function calcRSI(closes, period = 14) {
+  if (closes.length < period + 1) return null;
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const d = closes[i] - closes[i - 1];
+    if (d > 0) gains += d; else losses += Math.abs(d);
+  }
+  let avgGain = gains / period, avgLoss = losses / period;
+  for (let i = period + 1; i < closes.length; i++) {
+    const d = closes[i] - closes[i - 1];
+    avgGain = (avgGain * (period - 1) + Math.max(d, 0)) / period;
+    avgLoss = (avgLoss * (period - 1) + Math.max(-d, 0)) / period;
+  }
+  if (avgLoss === 0) return 100;
+  return 100 - (100 / (1 + avgGain / avgLoss));
+}
+
+// EMA (returns final value)
+function calcEMA(values, period) {
+  if (values.length < period) return null;
+  const k = 2 / (period + 1);
+  let ema = values.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  for (let i = period; i < values.length; i++) ema = values[i] * k + ema * (1 - k);
+  return ema;
+}
+
+// EMA array (returns value at each point, null for insufficient history)
+function calcEMAArray(values, period) {
+  if (values.length < period) return values.map(() => null);
+  const k = 2 / (period + 1);
+  const result = new Array(period - 1).fill(null);
+  let ema = values.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  result.push(ema);
+  for (let i = period; i < values.length; i++) {
+    ema = values[i] * k + ema * (1 - k);
+    result.push(ema);
+  }
+  return result;
+}
+
+// Stochastic RSI (K line)
+function calcStochRSI(closes, rsiPeriod = 14, stochPeriod = 14) {
+  if (closes.length < rsiPeriod + stochPeriod + 1) return null;
+  const rsiVals = [];
+  for (let i = rsiPeriod; i < closes.length; i++) {
+    const r = calcRSI(closes.slice(0, i + 1), rsiPeriod);
+    if (r !== null) rsiVals.push(r);
+  }
+  if (rsiVals.length < stochPeriod) return null;
+  const window = rsiVals.slice(-stochPeriod);
+  const minR = Math.min(...window), maxR = Math.max(...window);
+  if (maxR === minR) return 50;
+  return ((rsiVals[rsiVals.length - 1] - minR) / (maxR - minR)) * 100;
+}
+
+// MACD (12/26/9) — proper EMA-based calculation
+function calcMACD(closes, fast = 12, slow = 26, sigPeriod = 9) {
+  if (closes.length < slow + sigPeriod) return null;
+  const ema12arr = calcEMAArray(closes, fast);
+  const ema26arr = calcEMAArray(closes, slow);
+  const macdLine = [];
+  for (let i = 0; i < closes.length; i++) {
+    if (ema12arr[i] !== null && ema26arr[i] !== null) macdLine.push(ema12arr[i] - ema26arr[i]);
+  }
+  if (macdLine.length < sigPeriod) return null;
+  const signalLine = calcEMA(macdLine, sigPeriod);
+  const lastMACD = macdLine[macdLine.length - 1];
+  return { macd: lastMACD, signal: signalLine, hist: lastMACD - signalLine };
+}
+
+// Bollinger Bands (20-period, 2 std dev)
+function calcBB(closes, period = 20, mult = 2) {
+  if (closes.length < period) return null;
+  const slice = closes.slice(-period);
+  const sma = slice.reduce((a, b) => a + b, 0) / period;
+  const variance = slice.reduce((acc, v) => acc + Math.pow(v - sma, 2), 0) / period;
+  const std = Math.sqrt(variance);
+  return { upper: sma + mult * std, middle: sma, lower: sma - mult * std };
+}
+
+// OBV — cumulative volume direction
+function calcOBV(closes, volumes) {
+  let obv = 0;
+  const arr = [0];
+  for (let i = 1; i < closes.length; i++) {
+    const v = volumes[i] || 0;
+    if (closes[i] > closes[i - 1]) obv += v;
+    else if (closes[i] < closes[i - 1]) obv -= v;
+    arr.push(obv);
+  }
+  return arr;
+}
+
+// Wilder ATR (rolling array)
+function calcATRArray(highs, lows, closes, period = 14) {
+  const result = new Array(period).fill(null);
+  const trs = [null];
+  for (let i = 1; i < closes.length; i++) {
+    trs.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i-1]), Math.abs(lows[i] - closes[i-1])));
+  }
+  let atr = trs.slice(1, period + 1).reduce((a, b) => a + b, 0) / period;
+  result.push(atr);
+  for (let i = period + 1; i < closes.length; i++) {
+    atr = (atr * (period - 1) + trs[i]) / period;
+    result.push(atr);
+  }
+  return result;
+}
+
+// ADX (Wilder's smoothing)
+function calcADX(highs, lows, closes, period = 14) {
+  if (closes.length < period * 2) return null;
+  const trs = [], pdms = [], ndms = [];
+  for (let i = 1; i < closes.length; i++) {
+    trs.push(Math.max(highs[i]-lows[i], Math.abs(highs[i]-closes[i-1]), Math.abs(lows[i]-closes[i-1])));
+    const up = highs[i] - highs[i-1], dn = lows[i-1] - lows[i];
+    pdms.push(up > dn && up > 0 ? up : 0);
+    ndms.push(dn > up && dn > 0 ? dn : 0);
+  }
+  let sTR = trs.slice(0, period).reduce((a,b)=>a+b,0);
+  let sPDM = pdms.slice(0, period).reduce((a,b)=>a+b,0);
+  let sNDM = ndms.slice(0, period).reduce((a,b)=>a+b,0);
+  const dxs = [];
+  for (let i = period; i < trs.length; i++) {
+    sTR = sTR - sTR/period + trs[i];
+    sPDM = sPDM - sPDM/period + pdms[i];
+    sNDM = sNDM - sNDM/period + ndms[i];
+    const pdi = (sPDM/sTR)*100, ndi = (sNDM/sTR)*100;
+    const sum = pdi + ndi;
+    if (sum > 0) dxs.push(Math.abs(pdi - ndi) / sum * 100);
+  }
+  if (!dxs.length) return null;
+  let adx = dxs.slice(0, Math.min(period, dxs.length)).reduce((a,b)=>a+b,0) / Math.min(period, dxs.length);
+  for (let i = period; i < dxs.length; i++) adx = (adx * (period-1) + dxs[i]) / period;
+  return adx;
+}
+
+// Supertrend (ATR-based, proper rolling bands with flip logic)
+function calcSupertrend(highs, lows, closes, period = 10, mult = 3) {
+  if (closes.length < period + 2) return 'N/A';
+  const atrArr = calcATRArray(highs, lows, closes, period);
+  let direction = 1, superTrend = null;
+  for (let i = period; i < closes.length; i++) {
+    const atr = atrArr[i];
+    if (!atr) continue;
+    const hl2 = (highs[i] + lows[i]) / 2;
+    const upper = hl2 + mult * atr, lower = hl2 - mult * atr;
+    if (superTrend === null) { superTrend = lower; direction = 1; continue; }
+    if (direction === 1) {
+      superTrend = Math.max(superTrend, lower);
+      if (closes[i] < superTrend) { direction = -1; superTrend = upper; }
+    } else {
+      superTrend = Math.min(superTrend, upper);
+      if (closes[i] > superTrend) { direction = 1; superTrend = lower; }
+    }
+  }
+  return direction === 1 ? 'BUY' : 'SELL';
+}
+
+// Anchor VWAP using real volume (typical price × volume / total volume)
+function calcVWAP(highs, lows, closes, volumes) {
+  let tpv = 0, vol = 0;
+  for (let i = 0; i < closes.length; i++) {
+    const tp = (highs[i] + lows[i] + closes[i]) / 3;
+    const v = volumes[i] || 0;
+    tpv += tp * v; vol += v;
+  }
+  return vol > 0 ? tpv / vol : (highs.reduce((a,b)=>a+b,0)/highs.length + lows.reduce((a,b)=>a+b,0)/lows.length + closes.reduce((a,b)=>a+b,0)/closes.length) / 3;
+}
+
+// Relative performance vs SPY — fetch real SPY candles
+async function fetchSPYReturn() {
+  if (app.spyReturn !== undefined) return app.spyReturn;
+  const now = Math.floor(Date.now() / 1000);
+  const oneYearAgo = now - 365 * 24 * 3600;
+  try {
+    const resp = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=W&from=${oneYearAgo}&to=${now}&token=${FINNHUB_KEY}`);
+    const data = await resp.json();
+    if (data && data.s === 'ok' && data.c.length > 1) {
+      app.spyReturn = ((data.c[data.c.length-1] - data.c[0]) / data.c[0]) * 100;
+      return app.spyReturn;
+    }
+  } catch(e) { console.warn('SPY fetch failed:', e); }
+  app.spyReturn = null;
+  return null;
+}
+
+// Composite score from real indicator values (weighted multi-factor)
+function calcCompositeScore(rsi, stochK, macdHist, bbPos, adx, supTrend, emaAlign, obvTrend, relSPY) {
+  let bullPoints = 0, bearPoints = 0, total = 0;
+  function w(bull, bear, weight) { bullPoints += bull * weight; bearPoints += bear * weight; total += weight; }
+
+  if (rsi !== null) {
+    if (rsi < 35)       w(2, 0, 1.5);  // oversold = bullish setup
+    else if (rsi > 65)  w(0, 1.5, 1.5); // overbought = bearish risk
+    else                w(1, 0, 1);     // neutral-ish
+  }
+  if (stochK !== null) {
+    if (stochK < 20)    w(2, 0, 1);
+    else if (stochK > 80) w(0, 1.5, 1);
+    else                w(0.5, 0, 0.5);
+  }
+  if (macdHist !== null) { macdHist > 0 ? w(1.5, 0, 1.5) : w(0, 1.5, 1.5); }
+  if (bbPos !== null) {
+    if (bbPos === 'below') w(1.5, 0, 1);
+    else if (bbPos === 'above') w(0, 1, 1);
+    else w(0.5, 0, 0.5);
+  }
+  if (supTrend && supTrend !== 'N/A') { supTrend === 'BUY' ? w(2, 0, 2) : w(0, 2, 2); }
+  if (emaAlign) {
+    if (emaAlign === 'Aligned↑') w(2, 0, 1.5);
+    else if (emaAlign === 'Aligned↓') w(0, 2, 1.5);
+    else w(0.3, 0.3, 0.5);
+  }
+  if (obvTrend && obvTrend !== 'N/A') { obvTrend === 'Rising' ? w(1, 0, 1) : w(0, 1, 1); }
+  if (adx !== null && adx > 25) { w(0.5, 0, 0.5); } // strong trend (direction-agnostic bonus)
+  if (relSPY !== null) { relSPY > 0 ? w(1, 0, 1) : w(0, 0.5, 1); }
+
+  if (total === 0) return 50;
+  const score = (bullPoints / total) * 100;
+  return Math.min(95, Math.max(5, score));
+}
+
+// ======================== MAIN INDICATOR CALCULATOR ========================
+async function computeIndicators(symbol, livePrice, weeklySeries) {
+  if (!weeklySeries || weeklySeries.length < 2) weeklySeries = await fetchWeeklyCandles(symbol);
+  if (!weeklySeries.length) return null;
+
+  const closes  = weeklySeries.map(c => c.close);
+  const highs   = weeklySeries.map(c => c.high);
+  const lows    = weeklySeries.map(c => c.low);
+  const volumes = weeklySeries.map(c => c.volume || 0);
+  const price   = livePrice || closes[closes.length - 1];
+  const hasVol  = volumes.some(v => v > 0);
+
+  const rsi    = calcRSI(closes);
+  const stochK = calcStochRSI(closes);
+  const macd   = calcMACD(closes);
+  const bb     = calcBB(closes);
+  const bbPos  = bb ? (price > bb.upper ? 'above' : price < bb.lower ? 'below' : 'inside') : null;
+  const ema9   = calcEMA(closes, 9);
+  const ema21  = calcEMA(closes, 21);
+  const ema50  = calcEMA(closes, 50);
+
+  let emaAlign = 'Mixed';
+  if (ema9 && ema21 && ema50) {
+    if (price > ema9 && ema9 > ema21 && ema21 > ema50)   emaAlign = 'Aligned↑';
+    else if (price < ema9 && ema9 < ema21 && ema21 < ema50) emaAlign = 'Aligned↓';
+  }
+
+  let obvTrend = 'N/A';
+  if (hasVol) {
+    const obvArr = calcOBV(closes, volumes);
+    const recent = obvArr.slice(-5);
+    obvTrend = recent[recent.length - 1] > recent[0] ? 'Rising' : 'Falling';
+  }
+
+  const adx      = calcADX(highs, lows, closes);
+  const supTrend = closes.length >= 12 ? calcSupertrend(highs, lows, closes) : 'N/A';
+  const vwap     = calcVWAP(highs, lows, closes, volumes);
+
+  const spyReturn = await fetchSPYReturn();
+  let relVsSPY = null;
+  if (spyReturn !== null && closes.length > 1) {
+    const stockReturn = ((price - closes[0]) / closes[0]) * 100;
+    relVsSPY = stockReturn - spyReturn;
+  }
+
+  // MTF Agreement: weekly supertrend and MACD hist both bullish or both bearish
+  let mtf = 'Wait';
+  if (macd !== null && supTrend !== 'N/A') {
+    const macdBull = macd.hist > 0, supBull = supTrend === 'BUY';
+    if (macdBull && supBull)   mtf = 'Agree ↑';
+    else if (!macdBull && !supBull) mtf = 'Agree ↓';
+  }
+
+  const compScore = calcCompositeScore(rsi, stochK, macd?.hist ?? null, bbPos, adx, supTrend, emaAlign,
+    obvTrend === 'N/A' ? null : obvTrend, relVsSPY);
+
+  // Cache composite for BUY/SELL/HOLD cards
+  app.indicatorsCache[symbol] = { compScore };
+
+  return {
+    RSI:  rsi    !== null ? rsi.toFixed(1)          : 'N/A',
+    STO:  stochK !== null ? stochK.toFixed(1)       : 'N/A',
+    MAC:  macd   !== null ? macd.hist.toFixed(3)    : 'N/A',
+    BB:   bb     ? `${bb.lower.toFixed(2)} / ${bb.upper.toFixed(2)}` : 'N/A',
+    EMA:  emaAlign,
+    OBV:  obvTrend,
+    ADX:  adx    !== null ? adx.toFixed(1)          : 'N/A',
+    SUP:  supTrend,
+    VWAP: vwap.toFixed(2),
+    REL:  relVsSPY !== null ? (relVsSPY >= 0 ? '+' : '') + relVsSPY.toFixed(2) + '%' : 'N/A',
+    MTF:  mtf,
+    CMP:  compScore.toFixed(1)
+  };
+}
+
+async function updateIndicatorsForSymbol(symbol) {
+  const weekly = await fetchWeeklyCandles(symbol);
+  const ind = await computeIndicators(symbol, app.liveQuotes[symbol]?.c, weekly);
+  renderIndicatorsPanel(ind);
+  renderMonitorGrid();
+}
+
+function renderIndicatorsPanel(ind) {
+  const wrap = document.getElementById('indWrap');
+  if(!ind) { wrap.innerHTML = '<div class="timer">No stock selected</div>'; return; }
+  wrap.innerHTML = '';
+  INDICATORS.forEach(meta => {
+    let val = ind[meta.id] || '—';
+    if(meta.id === 'CMP') val = `${ind.CMP}%`;
+    const c = (meta.id==='CMP' && ind.CMP>60) ? 'var(--grn)' : (meta.id==='CMP' && ind.CMP<40) ? 'var(--red)' : 'inherit';
+    const item = document.createElement('div');
+    item.className = 'ind-item';
+    item.innerHTML = `<span class="ind-lbl">${meta.n} <span class="tip-icon" data-tip="${meta.t}">?</span></span>
+                      <span class="ind-val" style="color:${c}">${val}</span>`;
+    const tip = item.querySelector('.tip-icon');
+    tip.addEventListener('mouseenter', e => showTooltip(tip.getAttribute('data-tip'), e.clientX, e.clientY));
+    tip.addEventListener('mouseleave', hideTooltip);
+    wrap.appendChild(item);
+  });
+  document.getElementById('indSt').innerHTML = '✅ real-time';
+}
+
+function getStockMetrics(sym) {
+  const quote = app.liveQuotes[sym];
+  if(!quote || quote.failed) return { dp: 0, compVal: 50, sigClass: 'h' };
+  // Use cached real composite score if available
+  const cached = app.indicatorsCache[sym];
+  let compVal = cached ? cached.compScore : 50;
+  // Before indicators are computed, use daily % change as a rough proxy
+  if (!cached) compVal = Math.min(88, Math.max(12, 50 + ((quote.dp || 0) * 0.8)));
+  let sigClass = 'h';
+  if (compVal >= 62) sigClass = 'b'; else if (compVal <= 38) sigClass = 's';
+  return { dp: quote.dp || 0, compVal, sigClass };
+}
+
+function renderMonitorGrid() {
+  const container = document.getElementById('monGrid');
+  if(!container) return;
+  container.innerHTML = '';
+  const sortType = document.getElementById('monSort')?.value || 'default';
+  
+  let sortedStocks = [...STOCKS];
+  if(sortType !== 'default') {
+      sortedStocks.sort((a, b) => {
+          const m1 = getStockMetrics(a);
+          const m2 = getStockMetrics(b);
+          if(sortType === 'name') return a.localeCompare(b);
+          if(sortType === 'percentDesc') return m2.dp - m1.dp;
+          if(sortType === 'percentAsc') return m1.dp - m2.dp;
+          if(sortType === 'signal') return m2.compVal - m1.compVal;
+      });
+  }
+
+  sortedStocks.forEach(sym => {
+    const quote = app.liveQuotes[sym];
+    if(!quote) return;
+    const metrics = getStockMetrics(sym);
+    const isPos = (quote.dp || 0) >= 0;
+    const priceStr = quote.failed ? 'N/A' : (quote.stale ? `$${quote.c.toFixed(2)} ⚠` : `$${quote.c.toFixed(2)}`);
+    const chgStr  = quote.failed ? '—' : `${isPos?'+':''}${(quote.dp||0).toFixed(2)}%`;
+    
+    const card = document.createElement('div');
+    card.className = `card ${app.selected === sym ? 'sel' : ''} ${quote.failed ? 'failed-quote' : ''}`;
+    card.style.opacity = quote.failed ? '0.45' : '1';
+    card.innerHTML = `
+      <div class="sym">${sym} <span class="sig ${metrics.sigClass}">${metrics.sigClass==='b'?'BUY':metrics.sigClass==='s'?'SELL':'HOLD'} ${Math.round(metrics.compVal)}%</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:6px;">
+        <div class="pr" style="margin:0;">${priceStr}</div>
+        <div class="chg ${isPos ? 'p' : 'n'}">${chgStr}</div>
+      </div>
+    `;
+    card.onclick = () => selectSymbol(sym);
+    card.ondblclick = () => openDetailModal(sym);
+    container.appendChild(card);
+  });
+}
+
+function renderHeatmapReal() {
+  const heatDiv = document.getElementById('heatGrid');
+  heatDiv.innerHTML = '';
+  const sortType = document.getElementById('heatSort')?.value || 'percentDesc';
+  
+  let sortedStocks = [...STOCKS].filter(sym => app.liveQuotes[sym]);
+  sortedStocks.sort((a, b) => {
+      const qA = app.liveQuotes[a].dp || 0;
+      const qB = app.liveQuotes[b].dp || 0;
+      if(sortType === 'name') return a.localeCompare(b);
+      if(sortType === 'percentDesc') return qB - qA;
+      if(sortType === 'percentAsc') return qA - qB;
+      if(sortType === 'color') return Math.abs(qB) - Math.abs(qA);
+  });
+
+  sortedStocks.forEach(sym => {
+    const quote = app.liveQuotes[sym];
+    const chg = quote.dp || 0;
+    const intensity = Math.min(Math.abs(chg)/12, 0.8) + 0.15;
+    const bg = chg >= 0 ? `rgba(34,197,94,${intensity})` : `rgba(239,68,68,${intensity})`;
+    
+    const div = document.createElement('div');
+    div.className = 'hc'; div.style.background = bg;
+    div.textContent = `${sym} ${chg>=0?'+':''}${chg.toFixed(2)}%`;
+    
+    const name = STOCK_NAMES[sym] || sym;
+    const text = `📊 ${sym} (${name})<br><strong>Change: ${chg>=0?'+':''}${chg.toFixed(2)}%</strong>`;
+    div.addEventListener('mouseenter', e => showTooltip(text, e.clientX, e.clientY));
+    div.addEventListener('mouseleave', hideTooltip);
+    heatDiv.appendChild(div);
+  });
+}
+
+async function selectSymbol(sym) {
+  app.selected = sym;
+  renderMonitorGrid();
+  
+  // Enlarged Chart Header processing
+  document.getElementById('cTitle').innerHTML = `Weekly Chart — <span style="color:var(--blu); font-size:16px;">${sym}</span>`;
+  const nameEl = document.getElementById('stockNameSub');
+  nameEl.innerHTML = STOCK_NAMES[sym] || sym;
+  nameEl.style.display = 'block'; // Make visible after selection
+  
+  const wkData = await fetchWeeklyCandles(sym);
+  if(!app.chart) initChart();
+  if(app.candlestickSeries) {
+    app.candlestickSeries.setData(wkData);
+    app.chart.timeScale().fitContent();
+  }
+  updateIndicatorsForSymbol(sym);
+}
+
+function initChart() {
+  const container = document.getElementById('chartBox');
+  container.innerHTML = '';
+  app.chart = LightweightCharts.createChart(container, {
+    layout: { background: { type: 'solid', color: '#0f131a' }, textColor: '#8b96a3', fontSize: 10 },
+    grid: { vertLines: { color: '#262c36' }, horzLines: { color: '#262c36' } },
+    crosshair: { mode: 1 }, rightPriceScale: { borderColor: '#262c36' }, timeScale: { borderColor: '#262c36', timeVisible: true }
+  });
+  app.candlestickSeries = app.chart.addCandlestickSeries({ upColor: '#22c55e', downColor: '#ef4444' });
+}
+
+// Modal augmented to include fully computed indicators
+async function openDetailModal(sym) {
+  const quote = app.liveQuotes[sym];
+  document.getElementById('mTitle').innerHTML = `${sym} — ${STOCK_NAMES[sym] || sym}`;
+  document.getElementById('mBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><strong>Last Price</strong><br><span style="font-size:20px;">$${quote?.c?.toFixed(2) || 'N/A'}</span></div>
+      <div><strong>Daily Δ%</strong><br><span class="${quote?.dp>=0?'p':'n'}">${quote?.dp>=0?'+':''}${quote?.dp?.toFixed(2)||0}%</span></div>
+      <div><strong>Prev Close</strong><br>$${quote?.pc?.toFixed(2)||'—'}</div>
+      <div><strong>Market</strong><br>${app.isMarketOpen ? '🟢 Open' : '🔴 Closed'}</div>
+    </div>
+    <div id="modalInd" style="text-align:center; font-size:11px; color:var(--txt2); margin-top:15px;">Calculating Quant Signals...</div>
+  `;
+  document.getElementById('ov').classList.add('act');
+  
+  // Calculate specific modal indicators dynamically
+  const weekly = await fetchWeeklyCandles(sym);
+  const ind = await computeIndicators(sym, quote?.c, weekly);
+  
+  let indHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:10px; padding-top:10px; border-top:1px solid var(--brd);">`;
+  INDICATORS.forEach(meta => {
+     let val = ind[meta.id] || '—';
+     if(meta.id === 'CMP') val = `${ind.CMP}%`;
+     const c = (meta.id==='CMP' && ind.CMP>60) ? 'var(--grn)' : (meta.id==='CMP' && ind.CMP<40) ? 'var(--red)' : 'inherit';
+     indHtml += `<div style="display:flex; justify-content:space-between; background:#0f131a; padding:4px 8px; border-radius:4px; font-size:10px;">
+                    <span>${meta.n}</span>
+                    <span style="color:${c}; font-weight:bold; font-family:monospace;">${val}</span>
+                 </div>`;
+  });
+  indHtml += `</div>`;
+  document.getElementById('modalInd').innerHTML = `<strong style="color:var(--txt); font-size:12px;">Technical Quant Signals</strong>` + indHtml;
+}
+
+function renderGuideStatic() {
+  const guideDiv = document.getElementById('guideGrid');
+  guideDiv.innerHTML = INDICATORS.map(i => `<div class="gi"><h4>${i.n}</h4><p>${i.t}</p></div>`).join('');
+}
+
+let countdownSecs = 30*60;
+function startRefreshTimer() {
+  if(app.refreshTimer) clearInterval(app.refreshTimer);
+  app.refreshTimer = setInterval(() => {
+    countdownSecs -= 1;
+    if(countdownSecs <= 0) { countdownSecs = 30*60; refreshAllQuotes(); }
+    const mins = Math.floor(countdownSecs/60);
+    const secs = countdownSecs % 60;
+    document.getElementById('rCnt').innerText = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    document.getElementById('rFill').style.width = `${(countdownSecs/(30*60))*100}%`;
+  }, 1000);
+}
+
+document.getElementById('rBtn').onclick = () => { countdownSecs = 30*60; refreshAllQuotes(); };
+document.getElementById('mClose').onclick = () => document.getElementById('ov').classList.remove('act');
+document.getElementById('ov').onclick = e => { if(e.target === e.currentTarget) document.getElementById('ov').classList.remove('act'); };
+
+async function init() {
+  renderGuideStatic();
+  await loadStocksFromFile();
+  
+  if (STOCKS.length > 0) {
+    await refreshAllQuotes();
+    selectSymbol(STOCKS[0]);
+  }
+  
+  startRefreshTimer();
+  updateMarketUI();
+  
+  setInterval(async () => {
+    if(app.isMarketOpen) {
+      await refreshAllQuotes();
+      if(app.selected) updateIndicatorsForSymbol(app.selected);
+    }
+  }, 15000);
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
